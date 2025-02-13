@@ -92,8 +92,14 @@ public class BookController : ControllerBase
         _logger = logger;
     }
 
+    [HttpPost(Name = "UploadBook")]
+    public BookUpload PostBook([FromBody] BookUpload book)
+    {
+        return book;
+    }
+
     [HttpGet(Name = "GetBooks")]
-    public IEnumerable<BookView> Get()
+    public IEnumerable<BookView> GetBooks()
     {
         var books =  new List<BookView>();
         for(int i = 0; i < 3; i++){
