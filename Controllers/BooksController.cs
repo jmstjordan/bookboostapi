@@ -1,28 +1,27 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
-using System.Reflection.Metadata.Ecma335;
 
 namespace BookBoostApi.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class BookController : ControllerBase
+public class BooksController : ControllerBase
 {
-    private readonly ILogger<BookController> _logger;
+    private readonly ILogger<BooksController> _logger;
 
     private IBookService _bookService;
 
-    public BookController(ILogger<BookController> logger, IBookService bookApi)
+    public BooksController(ILogger<BooksController> logger, IBookService bookApi)
     {
         _logger = logger;
         _bookService = bookApi;
     }
 
-    [HttpPost()]
-    public bool UploadBook([FromBody] BookUpload book)
+    [HttpPost]
+    public async Task UploadBook([FromBody] IEnumerable<BookUpload> books)
     {
-        return _bookService.UploadBook(book);
+        await _bookService.UploadBook(books);
     }
 
     [HttpGet("uploads")]
@@ -31,8 +30,8 @@ public class BookController : ControllerBase
         return _bookService.GetBookUploadRecords("jmjordan");
     }
 
-    [HttpGet()]
-    public IEnumerable<Book> GetBooks([FromBody] BookSearch bookSearch)
+    [HttpGet]
+    public IEnumerable<Book> GetBooks([FromQuery] BookSearch bookSearch)
     {
         return _bookService.GetBooks(bookSearch);
     }

@@ -3,7 +3,10 @@ using BookBoostApi.Interfaces;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddSingleton<IBookService, BookService>();
+builder.Services.AddTransient((ctx) => {
+    return new ProductService(new RainforestService("9154143694D647E48B838B7E0933E946"));
+});
+builder.Services.AddTransient<IBookService, BookService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

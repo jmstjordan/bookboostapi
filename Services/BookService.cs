@@ -1,11 +1,19 @@
 
 
+using System.Threading.Tasks;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 
 public class BookService : IBookService
 {
-        private static readonly string[] Titles = new[]
+    private ProductService _productService;
+
+    public BookService(ProductService productService)
+    {
+        _productService = productService;
+    }
+
+    private static readonly string[] Titles = new[]
     {
         "Sapiens: A Brief History of Humankind", "Twilight", "Born a Crime: Stories from a South African Childhood (One World Essentials)"
     };
@@ -99,7 +107,8 @@ public class BookService : IBookService
                 PageLength = PageLength[i]
             });
         }
-        return books;    }
+        return books;    
+    }
 
     public IEnumerable<BookUploadRecord> GetBookUploadRecords(string user)
     {
@@ -114,7 +123,7 @@ public class BookService : IBookService
                     new BookLink
                     {
                         ProductId = "B00ICN066A",
-                        BookSource = BookSource.Amazon,
+                        ProductSource = ProductSource.Amazon,
                         Url = "https://www.amazon.com/Sapiens-Humankind-Yuval-Noah-Harari-ebook/dp/B00ICN066A"
                     }
                 }
@@ -122,8 +131,12 @@ public class BookService : IBookService
         };
     }
 
-    public bool UploadBook(BookUpload book)
+    public async Task UploadBook(IEnumerable<BookUpload> books)
     {
-        return true;
+        foreach(var book in books)
+        {
+            var productDetails = await _productService.GetProduct(book.Id, book.ProductSource);
+            // save off bookupload record to db
+        }
     }
 }

@@ -2,7 +2,9 @@ namespace BookBoostApi.Models;
 
 public class BookUpload
 {
-    public List<string> Urls { get; set; } = new List<string>();
+    public string Id { get; set; }
+
+    public ProductSource ProductSource { get; set; }
 }
 
 public class BookLink
@@ -11,7 +13,7 @@ public class BookLink
 
     public string Url { get; set;}
 
-    public BookSource BookSource { get; set;}
+    public ProductSource ProductSource { get; set;}
 }
 
 public class BookUploadRecord
@@ -21,9 +23,4 @@ public class BookUploadRecord
     public string User { get; set; }
 
     public List<BookLink> BookLinks { get; set; }
-}
-
-public enum BookSource
-{
-    Amazon
 }

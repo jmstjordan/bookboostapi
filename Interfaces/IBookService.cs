@@ -1,16 +1,15 @@
 
 using BookBoostApi.Models;
 
-namespace BookBoostApi.Interfaces
+namespace BookBoostApi.Interfaces;
+
+public interface IBookService
 {
-    public interface IBookService
-    {
-        public IEnumerable<Book> GetBooks(BookSearch bookSearch);
+    public IEnumerable<Book> GetBooks(BookSearch bookSearch);
 
-        public IEnumerable<BookUploadRecord> GetBookUploadRecords(string user);
+    public IEnumerable<BookUploadRecord> GetBookUploadRecords(string user);
 
-        public bool UploadBook (BookUpload book);
+    public Task UploadBook (IEnumerable<BookUpload> books);
 
-    }
 }
 
