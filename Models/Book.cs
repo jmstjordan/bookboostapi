@@ -1,8 +1,8 @@
 namespace BookBoostApi.Models;
 
-public class BookView
+public class Book
 {
-    public DateOnly ListDate { get; set; }
+    public DateOnly PublishDate { get; set; }
 
     public required string Title { get; set; }
 
@@ -21,4 +21,14 @@ public class BookView
     public int PageLength { get; set; }
 
     public List<Category> Categories { get; set; } = new List<Category>();
+
+}
+
+public enum Category
+{
+    Fiction,
+    NonFiction,
+    Romance,
+    Bestseller,
+    LiteraryFiction,
 }
