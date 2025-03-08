@@ -2,7 +2,7 @@ namespace BookBoostApi.Models;
 
 using System.Text.Json.Serialization;
 
-public class RainforestResponse
+public class RainforestProductResponse
 {
     [JsonPropertyName("product")]
     public RainforestProduct Product { get; set; }
@@ -23,4 +23,13 @@ public class RainforestProduct
     [JsonPropertyName("ratings_total")]
     public int RatingsTotal { get; set; }
 
+    [JsonPropertyName("main_image")]
+    public MainImage MainImage { get; set; }
+
+}
+
+public class MainImage
+{
+    [JsonPropertyName("link")]
+    public string Link { get; set; }
 }

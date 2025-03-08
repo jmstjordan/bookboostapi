@@ -3,3 +3,5 @@ bin/**
 
 dockerlogin
 .env
+
+mongocreds.txt
