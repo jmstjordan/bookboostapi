@@ -14,6 +14,9 @@ public class RainforestProduct
     [JsonPropertyName("title")]
     public string Title { get; set; }
 
+    [JsonPropertyName("book_description")]
+    public string BookDescription { get; set; }
+
     [JsonPropertyName("link")]
     public string Link { get; set; }
 
@@ -26,6 +29,21 @@ public class RainforestProduct
     [JsonPropertyName("main_image")]
     public MainImage MainImage { get; set; }
 
+    [JsonPropertyName("variants")]
+    public List<Variant> Variants { get; set; }
+
+}
+
+public class Variant
+{
+    [JsonPropertyName("title")]
+    public string Title { get; set; }
+
+    [JsonPropertyName("price")]
+    public Price Price { get; set; }
+
+    [JsonPropertyName("asin")]
+    public string Id { get; set; }
 }
 
 public class MainImage

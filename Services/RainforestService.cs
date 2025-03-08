@@ -12,7 +12,7 @@ public class RainforestService : IAmazonProductService
 
     private readonly string AMAZON_DOMAIN = "amazon.com";
 
-    private readonly string DEFAULT_SEARCH_TERM = "best-selling ebooks";
+    private readonly string DEFAULT_SEARCH_TERM = "best-selling+ebooks";
 
     private readonly string DEFAULT_SORT_BY = "featured";
 
@@ -37,10 +37,14 @@ public class RainforestService : IAmazonProductService
         // TODO: Consider cancelation token from client here as a param
         var response = await client.GetAsync<RainforestProductResponse>(request);
 
+        var variant = response.Product.Variants.Find(x => x.Id == asin);
         var product = new Product
         {
             ProductId = asin,
             Title = response.Product.Title,
+            Description = response.Product.BookDescription,
+            Price = variant?.Price,
+            NumReviews = response.Product.RatingsTotal,
             Link = response.Product.Link,
             Rating = response.Product.Rating,
             Image = response.Product.MainImage?.Link,
@@ -59,16 +63,22 @@ public class RainforestService : IAmazonProductService
             .AddParameter("api_key", _apiKey)
             .AddParameter("amazon_domain", AMAZON_DOMAIN)
             .AddParameter("category_id", productSearch.CategoryId)
+            .AddParameter("type", "search")
             .AddParameter("sort_by", productSearch.SortBy ?? DEFAULT_SORT_BY)
             .AddParameter("search_term", productSearch.SearchTerm ?? DEFAULT_SEARCH_TERM);
 
+
         // TODO: Consider cancelation token from client here as a param
-        var response = await client.GetAsync<RainforestSearchResponse>(request);
-        var products = new List<Product>();
-        if(response == null)
+        RainforestSearchResponse response;
+        try
         {
-            return products;
+            response = await client.GetAsync<RainforestSearchResponse>(request);
         }
+        catch(HttpRequestException e)
+        {
+            return new List<Product>();
+        }
+        var products = new List<Product>();
         foreach(RainforestSearchResult result in response.SearchResults)
         {
             products.Add(new Product
@@ -78,6 +88,8 @@ public class RainforestService : IAmazonProductService
                 Rating = result.Rating,
                 Price = result.Price,
                 ProductId = result.Asin,
+                Image = result.Image,
+                NumReviews = result.RatingsTotal,
                 ProductSource = ProductSource.Amazon
             });
         }

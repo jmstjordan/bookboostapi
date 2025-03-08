@@ -52,7 +52,7 @@ public class ProductController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteProduct(string id)
     {
-        var count = await _productService.DeleteProduct(id);
+        var count = await _productService.DeleteProduct("jmjordan", id);
         return count == 1 ? Ok() : NotFound();
     }
 }

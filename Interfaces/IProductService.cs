@@ -13,6 +13,6 @@ public interface IProductService
 
     public Task<Product> CreateProduct(ProductUpload product);
 
-    public Task<long> DeleteProduct(string id);
+    public Task<long> DeleteProduct(string user, string id);
 }
 

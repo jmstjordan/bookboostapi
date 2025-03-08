@@ -49,9 +49,9 @@ public class ProductService : IProductService
         }
     }
 
-    public async Task<long> DeleteProduct(string id)
+    public async Task<long> DeleteProduct(string user, string id)
     {
-        var result = await _productsCollection.DeleteOneAsync(x => x.Id == id);
+        var result = await _productsCollection.DeleteOneAsync(x => x.Id == id && x.User == user);
         return result.DeletedCount;
     }
 

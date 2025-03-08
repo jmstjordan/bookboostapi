@@ -12,9 +12,9 @@ public enum ProductSource
 public class Product
 {
     // This is the id that we generate, vs the one used as a lookup, like an ASIN
-    [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
+    [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; }
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     public required string ProductId { get; set; }   
 

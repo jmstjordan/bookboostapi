@@ -48,4 +48,7 @@ public class Price
     [JsonPropertyName("raw")]
     public string Raw { get; set; }
 
+    [JsonPropertyName("value")]
+    public double Value { get; set; }
+
 }

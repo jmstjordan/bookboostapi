@@ -1,6 +1,5 @@
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace BookBoostApi.Models;
 
@@ -17,9 +16,9 @@ public class AdUpload
 
 public class Ad : AdUpload
 {
-    [BsonId(IdGenerator = typeof(ObjectIdGenerator))]
+    [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    public string Id { get; set; }
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     public required string User { get; set; }
 }
