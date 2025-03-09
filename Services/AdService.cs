@@ -1,13 +1,17 @@
 namespace BookBoostApi.Services;
 
+using System.Collections.Generic;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 public class AdService : IAdService
 {
     private readonly IMongoCollection<Ad> _adsCollection;
+    private const int LENGTH_OF_AD_CALENDER = 90;
+    private const int MAX_AD_PER_DAY = 10;
 
     public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings)
     {
@@ -75,5 +79,107 @@ public class AdService : IAdService
     {
         var result = await _adsCollection.DeleteOneAsync(x => x.Id == id && x.User == user);
         return result.DeletedCount;
+    }
+
+    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Tier tier)
+    {
+        // Define the date range
+        DateTime startDate = DateTime.Now.AddDays(7);
+        DateTime endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
+
+        var allDates = Enumerable.Range(0, (endDate - startDate).Days)
+                                 .Select(offset => startDate.AddDays(offset).ToString("yyyy-MM-dd"))
+                                 .ToList();
+
+        var pipeline = new[]
+        {
+            // Step 1: Extract date (ignoring time) and keep the field we want to group by
+            new BsonDocument("$project", new BsonDocument
+            {
+                { "dateOnly", new BsonDocument("$dateToString", new BsonDocument
+                    {
+                        { "format", "%Y-%m-%d" },
+                        { "date", "$AdDate" }
+                    })
+                },
+                { "categoryField", "$Tier" }  // Replace 'yourField' with the field you want to bucket by
+            }),
+
+            // Step 2: Match documents within the date range
+            new BsonDocument("$match", new BsonDocument
+            {
+                { "dateOnly", new BsonDocument
+                    {
+                        { "$gte", startDate.ToString("yyyy-MM-dd") },
+                        { "$lte", endDate.ToString("yyyy-MM-dd") }
+                    }
+                }
+            }),
+
+            // Step 3: Group by date and category field, count occurrences
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", new BsonDocument
+                    {
+                        { "date", "$dateOnly" },
+                        { "category", "$categoryField" }
+                    }
+                },
+                { "count", new BsonDocument("$sum", 1) }
+            }),
+
+            // Step 4: Group again to structure the output as { date: ..., counts: [{category, count}, ...] }
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", "$_id.date" },
+                { "counts", new BsonDocument("$push", new BsonDocument
+                    {
+                        { "category", "$_id.category" },
+                        { "count", "$count" }
+                    })
+                }
+            }),
+
+            // Step 5: Sort results by date
+            new BsonDocument("$sort", new BsonDocument
+            {
+                { "_id", 1 }
+            })
+        };
+
+        var results = await _adsCollection.Aggregate<BsonDocument>(pipeline).ToListAsync();
+
+        var processedResults = allDates.Select(date =>
+        {
+            var result = results.FirstOrDefault(r => r["_id"] == date);
+            return new BsonDocument
+            {
+                { "date", date },
+                { "counts", result != null ? result["counts"].AsBsonArray : new BsonArray() }
+            };
+        }).ToList();
+
+        // Step 7: Print results
+        var adDates = new List<AdAvailability>();
+        foreach (var result in processedResults)
+        {
+            foreach (var category in result["counts"].AsBsonArray)
+            {
+                if(category["category"].AsInt32 == (int) tier){
+                    adDates.Add(new AdAvailability { AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
+                }
+            }
+        }
+
+        var res = allDates.Select(date =>
+        {
+            var result = adDates.FirstOrDefault(r => r.AdDate == date);
+            return new AdAvailability
+            {
+                AdDate = date,
+                Count = result != null ? MAX_AD_PER_DAY - result.Count : MAX_AD_PER_DAY
+            };
+        }).ToList();
+        return res;
     }
 }

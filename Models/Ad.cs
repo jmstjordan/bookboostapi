@@ -29,4 +29,14 @@ public class Ad : AdUpload
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     public required string User { get; set; }
+
+    public DateOnly Created { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    
+}
+
+public class AdAvailability
+{
+    public required string AdDate { get; set; }
+
+    public required int Count { get; set; }
 }

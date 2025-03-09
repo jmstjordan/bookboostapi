@@ -74,4 +74,11 @@ public class AdController : ControllerBase
         var result = await _adService.UpdateAd(existingAd);
         return result != null ? Ok(result) : BadRequest();
     }
+
+    [HttpGet("Available/{tier}")]
+    public async Task<ActionResult> GetAvailableDates(Tier tier)
+    {
+        return Ok(await _adService.AvailableAdDates(tier));
+    }
+
 }

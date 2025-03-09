@@ -1,5 +1,6 @@
 
 using BookBoostApi.Models;
+using MongoDB.Bson;
 
 namespace BookBoostApi.Interfaces;
 
@@ -14,6 +15,8 @@ public interface IAdService
     public Task<Ad> UpdateAd(Ad ad);
 
     public Task<long> DeleteAd(string user, string id);
+
+    public Task<IEnumerable<AdAvailability>> AvailableAdDates(Tier tier);
 
 }
 
