@@ -2,7 +2,6 @@ namespace BookBoostApi.Models;
 
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
-using MongoDB.Bson.Serialization.IdGenerators;
 
 public enum ProductSource
 {

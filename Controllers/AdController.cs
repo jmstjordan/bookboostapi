@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
+using System.ComponentModel;
 
 namespace BookBoostApi.Controllers;
 
@@ -12,10 +13,13 @@ public class AdController : ControllerBase
 
     private IAdService _adService;
 
-    public AdController(ILogger<AdController> logger, IAdService adService)
+    private IProductService _productService;
+
+    public AdController(ILogger<AdController> logger, IAdService adService, IProductService productService)
     {
         _logger = logger;
         _adService = adService;
+        _productService = productService;
     }
  
     [HttpPost]
@@ -23,6 +27,11 @@ public class AdController : ControllerBase
     {
         try
         {
+            var product = await _productService.GetProduct(ad.ProductId);
+            if(product == null)
+            {
+                return BadRequest("Invalid Product Id");
+            }
             var createdAd = await _adService.CreateAd(ad, "jmjordan");
             return Created(createdAd.Id.ToString(), createdAd);
         }
@@ -37,6 +46,12 @@ public class AdController : ControllerBase
     {
         return await _adService.GetAds("jmjordan");
     }
+
+    [HttpGet("{id}")]
+    public async Task<Ad> GetAd(string id)
+    {
+        return await _adService.GetAd("jmjordan", id);
+    }
     
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAd(string id)
@@ -45,10 +60,18 @@ public class AdController : ControllerBase
         return count == 1 ? Ok() : NotFound();
     }
 
-    [HttpPatch]
-    public async Task<ActionResult> UpdateAd([FromBody] Ad ad)
+    [HttpPatch("{id}")]
+    public async Task<ActionResult> UpdateAd(string id, [FromBody] AdUpload ad)
     {
-        var result = await _adService.UpdateAd(ad);
-        return result != null ? Ok(result) : NotFound();
+        var existingAd = await _adService.GetAd("jmjordan", id);
+        if(existingAd == null)
+        {
+            return NotFound();
+        }
+        existingAd.Genre = ad.Genre;
+        existingAd.Tier = ad.Tier;
+        existingAd.AdDate = ad.AdDate;
+        var result = await _adService.UpdateAd(existingAd);
+        return result != null ? Ok(result) : BadRequest();
     }
 }

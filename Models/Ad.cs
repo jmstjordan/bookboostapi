@@ -10,8 +10,16 @@ public class AdUpload
 
     public required Genre Genre { get; set; }
 
+    // Not to be confused with ProductId on the Product, this is the Product's Id... :(
     public required string ProductId { get; set; }
 
+    public required Tier Tier { get; set; }
+}
+
+public enum Tier
+{
+    Basic = 1,
+    Ambassador = 2
 }
 
 public class Ad : AdUpload

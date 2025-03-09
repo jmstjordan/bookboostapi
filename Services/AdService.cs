@@ -1,10 +1,8 @@
 namespace BookBoostApi.Services;
 
-using System.Xml;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 public class AdService : IAdService
@@ -23,20 +21,21 @@ public class AdService : IAdService
             bookBoostDatabaseSettings.Value.DatabaseName);
 
         _adsCollection = mongoDatabase.GetCollection<Ad>(
-            bookBoostDatabaseSettings.Value.ProductsCollectionName);
+            bookBoostDatabaseSettings.Value.AdsCollectionName);
     }
 
     public async Task<Ad> CreateAd(AdUpload ad, string user)
     {
         if(AdExistsByUser("jmjordan", ad.ProductId, ad.AdDate, ad.Genre))
         {
-            throw new ConflictException("Document already exists");
+            throw new ConflictException("Ad already exists");
         }
         var newAd = new Ad 
         {
             Genre = ad.Genre,
             ProductId = ad.ProductId,
             AdDate = ad.AdDate,
+            Tier = ad.Tier,
             User = user
         };
         await _adsCollection.InsertOneAsync(newAd);

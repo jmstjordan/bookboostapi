@@ -14,5 +14,7 @@ public interface IProductService
     public Task<Product> CreateProduct(ProductUpload product);
 
     public Task<long> DeleteProduct(string user, string id);
+
+    public Task<bool> ProductExistsByUser(string user, string id, ProductSource productSource);
 }
 

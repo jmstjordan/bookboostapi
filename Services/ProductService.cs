@@ -35,7 +35,7 @@ public class ProductService : IProductService
         switch(product.ProductSource)
         {
             case ProductSource.Amazon:
-                if(ProductExistsByUser("jmjordan", product.ProductId, product.ProductSource))
+                if(await ProductExistsByUser("jmjordan", product.ProductId, product.ProductSource))
                 {
                     throw new ConflictException("Document already exists");
                 }
@@ -60,9 +60,9 @@ public class ProductService : IProductService
         return await _productsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
     }
 
-    private bool ProductExistsByUser(string user, string productId, ProductSource productSource)
+    public async Task<bool> ProductExistsByUser(string user, string productId, ProductSource productSource)
     {
-        return _productsCollection.CountDocuments(x => x.ProductId == productId 
+        return await _productsCollection.CountDocumentsAsync(x => x.ProductId == productId 
             && x.User == user 
             && x.ProductSource == productSource
         ) > 0;
