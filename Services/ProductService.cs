@@ -4,7 +4,6 @@ using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 public class ProductService : IProductService

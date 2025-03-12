@@ -10,4 +10,6 @@ public class BookBoostDatabaseSettings
     public string AdsCollectionName { get; set; } = null!;
 
     public string UsersCollectionName { get; set; } = null!;
+
+    public string TemplatesCollectionName { get; set; } = null!;
 }

@@ -40,7 +40,8 @@ public class AdService : IAdService
             ProductId = ad.ProductId,
             AdDate = ad.AdDate,
             Tier = ad.Tier,
-            User = user
+            User = user,
+            State = AdState.Pending
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 

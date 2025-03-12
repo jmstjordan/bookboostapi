@@ -1,7 +1,5 @@
 
 using BookBoostApi.Models;
-using MongoDB.Bson;
-
 namespace BookBoostApi.Interfaces;
 
 public interface IAdService

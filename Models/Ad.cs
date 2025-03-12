@@ -30,8 +30,17 @@ public class Ad : AdUpload
 
     public required string User { get; set; }
 
+    public required AdState State { get; set; } = AdState.Pending;
+
     public DateOnly Created { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-    
+
+}
+
+public enum AdState
+{
+    Pending = 0,
+    Declined = 1,
+    Accepted = 2
 }
 
 public class AdAvailability

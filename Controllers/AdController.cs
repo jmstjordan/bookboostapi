@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
-using System.ComponentModel;
 
 namespace BookBoostApi.Controllers;
 
@@ -15,11 +14,14 @@ public class AdController : ControllerBase
 
     private IProductService _productService;
 
-    public AdController(ILogger<AdController> logger, IAdService adService, IProductService productService)
+    private IAppEmailService _emailService;
+
+    public AdController(ILogger<AdController> logger, IAdService adService, IProductService productService, IAppEmailService emailService)
     {
         _logger = logger;
         _adService = adService;
         _productService = productService;
+        _emailService = emailService;
     }
  
     [HttpPost]
@@ -33,6 +35,7 @@ public class AdController : ControllerBase
                 return BadRequest("Invalid Product Id");
             }
             var createdAd = await _adService.CreateAd(ad, "jmjordan");
+            await _emailService.SendAdCreated("jmstjordan");
             return Created(createdAd.Id.ToString(), createdAd);
         }
         catch(ConflictException)
@@ -63,6 +66,7 @@ public class AdController : ControllerBase
     [HttpPatch("{id}")]
     public async Task<ActionResult> UpdateAd(string id, [FromBody] AdUpload ad)
     {
+        // TODO: if admin, ad bypass
         var existingAd = await _adService.GetAd("jmjordan", id);
         if(existingAd == null)
         {
@@ -80,5 +84,4 @@ public class AdController : ControllerBase
     {
         return Ok(await _adService.AvailableAdDates(tier));
     }
-
 }

@@ -19,7 +19,14 @@ builder.Services.Configure<ApiKeySettings>(
     builder.Configuration.GetSection("ApiKeys")
 );
 
+builder.Services.Configure<NotificationSettings>(
+    builder.Configuration.GetSection("NotificationSettings")
+);
+
 builder.Services.AddTransient<IAmazonProductService, RainforestService>();
+builder.Services.AddTransient<IEmailService, AmazonEmailService>();
+builder.Services.AddTransient<ITemplateService, FluidService>();
+builder.Services.AddTransient<IAppEmailService, AppEmailService>();
 builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IAdService, AdService>();
 

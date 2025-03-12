@@ -95,5 +95,4 @@ public class RainforestService : IAmazonProductService
         }
         return products;
     }
-
 }
