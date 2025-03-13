@@ -3,17 +3,18 @@ using MongoDB.Bson.Serialization.Attributes;
 
 namespace BookBoostApi.Models;
 
-
 public class AdUpload
 {
-    public required DateOnly AdDate { get; set; }
+    public DateOnly? AdDate { get; set; }
 
-    public required Genre Genre { get; set; }
+    public Genre? Genre { get; set; }
 
     // Not to be confused with ProductId on the Product, this is the Product's Id... :(
-    public required string ProductId { get; set; }
+    public string? ProductId { get; set; }
 
-    public required Tier Tier { get; set; }
+    public Tier? Tier { get; set; }
+
+    public AdState? State { get; set; }
 }
 
 public enum Tier
@@ -29,8 +30,6 @@ public class Ad : AdUpload
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     public required string User { get; set; }
-
-    public required AdState State { get; set; } = AdState.Pending;
 
     public DateOnly Created { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 

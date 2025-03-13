@@ -47,7 +47,7 @@ public class AdService : IAdService
         return newAd; 
     }
 
-    private bool AdExistsByUser(string user, string productId, DateOnly adDate, Genre genre)
+    private bool AdExistsByUser(string? user, string? productId, DateOnly? adDate, Genre? genre)
     {
         return _adsCollection.CountDocuments(x => x.ProductId == productId 
             && x.User == user 

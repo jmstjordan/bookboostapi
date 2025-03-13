@@ -45,10 +45,10 @@ public class AppEmailService : IAppEmailService
         return await RenderAndSend(TemplateType.AdAccepted, new { Firstname = "Bill", Lastname = "Gates" });
     }
 
-    public async Task<bool> SendAdDenied(string user)
+    public async Task<bool> SendAdDeclined(string user)
     {
         // look up user email
-        return await RenderAndSend(TemplateType.AdDenied, new { Firstname = "Bill", Lastname = "Gates" });
+        return await RenderAndSend(TemplateType.AdDeclined, new { Firstname = "Bill", Lastname = "Gates" });
     }
 
     public async Task<bool> SendUserCreated(string user)

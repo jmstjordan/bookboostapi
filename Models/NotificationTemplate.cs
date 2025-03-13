@@ -22,7 +22,7 @@ public enum TemplateType
 {
     AdCreated = 0,
     AdAccepted = 1,
-    AdDenied = 2,
+    AdDeclined = 2,
     PromotionJoined = 3,
     UserCreated = 4
 }

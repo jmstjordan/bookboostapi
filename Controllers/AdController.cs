@@ -29,6 +29,10 @@ public class AdController : ControllerBase
     {
         try
         {
+            if(ad.AdDate == null || ad.Genre == null || ad.Tier == null || ad.ProductId == null)
+            {
+                return BadRequest("Ad requires AdDate, Genre, Tier, and ProductId fields");
+            }
             var product = await _productService.GetProduct(ad.ProductId);
             if(product == null)
             {
@@ -70,11 +74,28 @@ public class AdController : ControllerBase
         var existingAd = await _adService.GetAd("jmjordan", id);
         if(existingAd == null)
         {
-            return NotFound();
+            return NotFound("Ad not found");
         }
-        existingAd.Genre = ad.Genre;
-        existingAd.Tier = ad.Tier;
-        existingAd.AdDate = ad.AdDate;
+        if(ad.Genre != null)
+            existingAd.Genre = ad.Genre;
+        if(ad.Tier != null)
+            existingAd.Tier = ad.Tier;
+        if(ad.AdDate != null)
+            existingAd.AdDate = ad.AdDate;
+        if(ad.ProductId != null)
+            existingAd.ProductId = ad.ProductId;
+        if(true && ad.State != null){
+            // if we are an admin
+            if(ad.State == AdState.Accepted)
+            {
+                await _emailService.SendAdAccepted("jmjordan");
+            }
+            else if(ad.State == AdState.Declined)
+            {
+                await _emailService.SendAdDeclined("jmjordan");
+            }
+            existingAd.State = ad.State;
+        }
         var result = await _adService.UpdateAd(existingAd);
         return result != null ? Ok(result) : BadRequest();
     }

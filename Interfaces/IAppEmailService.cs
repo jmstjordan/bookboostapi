@@ -6,7 +6,7 @@ public interface IAppEmailService
 
     public Task<bool> SendAdAccepted(string user);
 
-    public Task<bool> SendAdDenied(string user);
+    public Task<bool> SendAdDeclined(string user);
 
     public Task<bool> SendUserCreated(string user);
 
