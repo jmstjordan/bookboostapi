@@ -55,9 +55,14 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    public async Task<Ad> GetAd(string id)
+    public async Task<IActionResult> GetAd(string id)
     {
-        return await _adService.GetAd("jmjordan", id);
+        var result = await _adService.GetAd("jmjordan", id);
+        if(result == null)
+        {
+            return NotFound("Ad not found");
+        }
+        return Ok(result);
     }
     
     [HttpDelete("{id}")]
