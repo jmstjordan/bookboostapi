@@ -12,10 +12,19 @@ public class ProductController : ControllerBase
 
     private IProductService _productService;
 
-    public ProductController(ILogger<ProductController> logger, IProductService productService)
+    private IAiService _aiService;
+
+    public ProductController(ILogger<ProductController> logger, IProductService productService, IAiService aiService)
     {
         _logger = logger;
         _productService = productService;
+        _aiService = aiService;
+    }
+
+    [HttpGet("ai")]
+    public async Task<IActionResult> TestAi(string data)
+    {
+        return Ok(await _aiService.TrimDescription(data, 250));
     }
 
     [HttpPost]

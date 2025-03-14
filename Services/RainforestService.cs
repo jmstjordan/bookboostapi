@@ -19,9 +19,9 @@ public class RainforestService : IAmazonProductService
     private string _apiKey;
 
 
-    public RainforestService(IOptions<ApiKeySettings> apiKeySettings)
+    public RainforestService(IOptions<RainforestSettings> settings)
     {
-        _apiKey = apiKeySettings.Value.RainforestApiKey;
+        _apiKey = settings.Value.ApiKey;
     }
 
     public async Task<Product> GetProduct(string asin)

@@ -1,5 +1,6 @@
 using BookBoostApi.Interfaces;
 using BookBoostApi.Services;
+using BookBoostApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,22 +11,28 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
+builder.Services.AddApplicationInsightsTelemetry();
 
 builder.Services.Configure<BookBoostDatabaseSettings>(
     builder.Configuration.GetSection("BookBoostDatabase")
 );
 
-builder.Services.Configure<ApiKeySettings>(
-    builder.Configuration.GetSection("ApiKeys")
+builder.Services.Configure<RainforestSettings>(
+    builder.Configuration.GetSection("RainforestSettings")
 );
 
 builder.Services.Configure<NotificationSettings>(
     builder.Configuration.GetSection("NotificationSettings")
 );
 
+builder.Services.Configure<OpenAiSettings>(
+    builder.Configuration.GetSection("OpenAiSettings")
+);
+
 builder.Services.AddTransient<IAmazonProductService, RainforestService>();
 builder.Services.AddTransient<IEmailService, AmazonEmailService>();
 builder.Services.AddTransient<ITemplateService, FluidService>();
+builder.Services.AddTransient<IAiService, OpenAiService>();
 builder.Services.AddTransient<IAppEmailService, AppEmailService>();
 builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IAdService, AdService>();

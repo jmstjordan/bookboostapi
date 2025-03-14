@@ -1,3 +1,4 @@
+namespace BookBoostApi.Models;
 
 public class BookBoostDatabaseSettings
 {

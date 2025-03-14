@@ -3,6 +3,7 @@ using Amazon.SimpleEmail;
 using Amazon.SimpleEmail.Model;
 using Microsoft.Extensions.Options;
 using BookBoostApi.Interfaces;
+using BookBoostApi.Models;
 
 public class AmazonEmailService : IEmailService
 {
