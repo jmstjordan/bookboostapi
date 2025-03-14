@@ -11,11 +11,13 @@ public class ProductService : IProductService
     private IAmazonProductService _amazonProductService;
     private readonly IMongoCollection<Product> _productsCollection;
     private IMemoryCache _memoryCache;
+    private IAiService _aiService;
 
-    public ProductService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IAmazonProductService amazonProductService, IMemoryCache memoryCache)
+    public ProductService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IAmazonProductService amazonProductService, IMemoryCache memoryCache, IAiService aiService)
     {
         _amazonProductService = amazonProductService;
         _memoryCache = memoryCache;
+        _aiService = aiService;
 
         // // and any other products, apple, google, barns and noble, etc.
 
@@ -39,6 +41,8 @@ public class ProductService : IProductService
                     throw new ConflictException("Document already exists");
                 }
                 var amazonProduct = await _amazonProductService.GetProduct(product.ProductId);
+                if(amazonProduct.Description != null)
+                    amazonProduct.DescriptionView = await _aiService.TrimDescription(amazonProduct.Description, 250);
                 amazonProduct.UploadDate = DateOnly.FromDateTime(DateTime.Now);
                 amazonProduct.User = "jmjordan";
                 await _productsCollection.InsertOneAsync(amazonProduct);

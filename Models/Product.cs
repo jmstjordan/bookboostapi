@@ -23,6 +23,8 @@ public class Product
 
     public string? Description { get; set; }
 
+    public string? DescriptionView { get; set; }
+
     public string? Link { get; set; }
 
     public Price? Price { get; set; }

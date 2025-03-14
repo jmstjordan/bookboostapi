@@ -21,7 +21,7 @@ public class ProductController : ControllerBase
         _aiService = aiService;
     }
 
-    [HttpGet("ai")]
+    // [HttpGet("ai")]
     public async Task<IActionResult> TestAi(string data)
     {
         return Ok(await _aiService.TrimDescription(data, 250));
