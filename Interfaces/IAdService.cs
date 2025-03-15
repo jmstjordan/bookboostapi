@@ -14,7 +14,7 @@ public interface IAdService
 
     public Task<long> DeleteAd(string user, string id);
 
-    public Task<IEnumerable<AdAvailability>> AvailableAdDates(Tier tier);
+    public Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre, string productId);
 
 }
 

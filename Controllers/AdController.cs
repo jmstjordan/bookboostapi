@@ -29,10 +29,6 @@ public class AdController : ControllerBase
     {
         try
         {
-            if(ad.AdDate == null || ad.Genre == null || ad.Tier == null || ad.ProductId == null)
-            {
-                return BadRequest("Ad requires AdDate, Genre, Tier, and ProductId fields");
-            }
             var product = await _productService.GetProduct(ad.ProductId);
             if(product == null)
             {
@@ -73,23 +69,14 @@ public class AdController : ControllerBase
     }
 
     [HttpPatch("{id}")]
-    public async Task<ActionResult> UpdateAd(string id, [FromBody] AdUpload ad)
+    public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
-        // TODO: if admin, ad bypass
         var existingAd = await _adService.GetAd("jmjordan", id);
         if(existingAd == null)
         {
             return NotFound("Ad not found");
         }
-        if(ad.Genre != null)
-            existingAd.Genre = ad.Genre;
-        if(ad.Tier != null)
-            existingAd.Tier = ad.Tier;
-        if(ad.AdDate != null)
-            existingAd.AdDate = ad.AdDate;
-        if(ad.ProductId != null)
-            existingAd.ProductId = ad.ProductId;
-        if(true && ad.State != null){
+        if(true){
             // if we are an admin
             if(ad.State == AdState.Accepted)
             {
@@ -105,9 +92,9 @@ public class AdController : ControllerBase
         return result != null ? Ok(result) : BadRequest();
     }
 
-    [HttpGet("Available/{tier}")]
-    public async Task<ActionResult> GetAvailableDates(Tier tier)
+    [HttpGet("Availability/{genre}/Product/{id}")]
+    public async Task<ActionResult> GetAvailableDates(Genre genre, string id)
     {
-        return Ok(await _adService.AvailableAdDates(tier));
+        return Ok(await _adService.AvailableAdDates(genre, id));
     }
 }

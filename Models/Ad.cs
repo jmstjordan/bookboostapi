@@ -7,14 +7,19 @@ public class AdUpload
 {
     public DateOnly? AdDate { get; set; }
 
-    public Genre? Genre { get; set; }
+    public required Genre Genre { get; set; }
 
     // Not to be confused with ProductId on the Product, this is the Product's Id... :(
-    public string? ProductId { get; set; }
+    public required string ProductId { get; set; }
 
     public Tier? Tier { get; set; }
 
     public AdState? State { get; set; }
+}
+
+public class AdPatch
+{
+    public required AdState State { get; set; }
 }
 
 public enum Tier
@@ -47,4 +52,6 @@ public class AdAvailability
     public required string AdDate { get; set; }
 
     public required int Count { get; set; }
+
+    public required double Price { get; set; }
 }

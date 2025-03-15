@@ -1,6 +1,7 @@
 namespace BookBoostApi.Services;
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
@@ -30,9 +31,17 @@ public class AdService : IAdService
 
     public async Task<Ad> CreateAd(AdUpload ad, string user)
     {
+        if(ad.AdDate == null)
+        {
+            ad.AdDate = await AssignAdDate(ad.Genre, ad.ProductId);
+        }
         if(AdExistsByUser("jmjordan", ad.ProductId, ad.AdDate, ad.Genre))
         {
             throw new ConflictException("Ad already exists");
+        }
+        if(ad.Tier == null)
+        {
+            ad.Tier = Tier.Basic;
         }
         var newAd = new Ad 
         {
@@ -45,6 +54,19 @@ public class AdService : IAdService
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 
+    }
+
+    private async Task<DateOnly?> AssignAdDate(Genre genre, string productId)
+    {
+        var dates = await AvailableAdDates(genre, productId);
+        foreach(AdAvailability date in dates)
+        {
+            if(date.Count > 0)
+            {
+                return DateOnly.Parse(date.AdDate);
+            }
+        }
+        return null;
     }
 
     private bool AdExistsByUser(string? user, string? productId, DateOnly? adDate, Genre? genre)
@@ -82,10 +104,10 @@ public class AdService : IAdService
         return result.DeletedCount;
     }
 
-    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Tier tier)
+    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre, string productId)
     {
         // Define the date range
-        DateTime startDate = DateTime.Now.AddDays(7);
+        DateTime startDate = DateTime.Now.AddDays(1);
         DateTime endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
 
         var allDates = Enumerable.Range(0, (endDate - startDate).Days)
@@ -103,7 +125,7 @@ public class AdService : IAdService
                         { "date", "$AdDate" }
                     })
                 },
-                { "categoryField", "$Tier" }  // Replace 'yourField' with the field you want to bucket by
+                { "categoryField", "$Genre" }  // Replace 'yourField' with the field you want to bucket by
             }),
 
             // Step 2: Match documents within the date range
@@ -166,8 +188,9 @@ public class AdService : IAdService
         {
             foreach (var category in result["counts"].AsBsonArray)
             {
-                if(category["category"].AsInt32 == (int) tier){
-                    adDates.Add(new AdAvailability { AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
+                if(category["category"].AsInt32 == (int) genre)
+                {
+                    adDates.Add(new AdAvailability { Price = 0, AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
                 }
             }
         }
@@ -175,12 +198,26 @@ public class AdService : IAdService
         var res = allDates.Select(date =>
         {
             var result = adDates.FirstOrDefault(r => r.AdDate == date);
+            var count = result != null ? MAX_AD_PER_DAY - result.Count : MAX_AD_PER_DAY;
             return new AdAvailability
             {
+                Price = GetPrice(genre, count, 0), 
                 AdDate = date,
-                Count = result != null ? MAX_AD_PER_DAY - result.Count : MAX_AD_PER_DAY
+                Count = count
             };
         }).ToList();
         return res;
+    }
+
+    private double GetPrice(Genre genre, int remainingAds, double productPrice)
+    {
+        switch(genre)
+        {
+            case Genre.MysteryThriller:
+
+                return 50;
+            default:
+                return 10;
+        }
     }
 }
