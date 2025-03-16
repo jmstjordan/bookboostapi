@@ -11,13 +11,15 @@ using MongoDB.Driver;
 public class AdService : IAdService
 {
     private readonly IMongoCollection<Ad> _adsCollection;
+    private IProductService _productService;
     private const int LENGTH_OF_AD_CALENDER = 90;
     private const int MAX_AD_PER_DAY = 10;
 
-    public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings)
+    public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IProductService productService)
     {
         // _amazonProductService = amazonProductService;
         // // and any other products, apple, google, barns and noble, etc.
+        _productService = productService;
 
         var mongoClient = new MongoClient(
             bookBoostDatabaseSettings.Value.ConnectionString);
@@ -31,34 +33,44 @@ public class AdService : IAdService
 
     public async Task<Ad> CreateAd(AdUpload ad, string user)
     {
-        if(ad.AdDate == null)
-        {
-            ad.AdDate = await AssignAdDate(ad.Genre, ad.ProductId);
-        }
-        if(AdExistsByUser("jmjordan", ad.ProductId, ad.AdDate, ad.Genre))
+        var product = await _productService.GetProduct(ad.ProductUpload);
+        if(AdExistsByUser("jmjordan", product.ProductId, ad.AdDate, ad.Genre))
         {
             throw new ConflictException("Ad already exists");
         }
-        if(ad.Tier == null)
+        if(!await AdDateEligible(ad.Genre, ad.AdDate))
         {
-            ad.Tier = Tier.Basic;
+            throw new ConflictException("Ad Date not available");
         }
         var newAd = new Ad 
         {
             Genre = ad.Genre,
-            ProductId = ad.ProductId,
+            Product = product,
             AdDate = ad.AdDate,
-            Tier = ad.Tier,
             User = user,
-            State = AdState.Pending
+            State = AdState.Pending,
+            Created = DateOnly.FromDateTime(DateTime.Now)
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 
     }
 
-    private async Task<DateOnly?> AssignAdDate(Genre genre, string productId)
+    private async Task<bool> AdDateEligible(Genre genre, DateOnly adDate)
     {
-        var dates = await AvailableAdDates(genre, productId);
+        var dates = await AvailableAdDates(genre);
+        foreach(AdAvailability date in dates)
+        {
+            if(DateOnly.Parse(date.AdDate) == adDate)
+            {
+                return date.Count > 0;
+            }
+        }
+        return false;
+    }
+
+    private async Task<DateOnly> AssignAdDate(Genre genre)
+    {
+        var dates = await AvailableAdDates(genre);
         foreach(AdAvailability date in dates)
         {
             if(date.Count > 0)
@@ -66,12 +78,12 @@ public class AdService : IAdService
                 return DateOnly.Parse(date.AdDate);
             }
         }
-        return null;
+        throw new Exception("Unable to find Ad Date");
     }
 
-    private bool AdExistsByUser(string? user, string? productId, DateOnly? adDate, Genre? genre)
+    private bool AdExistsByUser(string user, string productId, DateOnly adDate, Genre genre)
     {
-        return _adsCollection.CountDocuments(x => x.ProductId == productId 
+        return _adsCollection.CountDocuments(x => x.Product.ProductId == productId 
             && x.User == user 
             && x.Genre == genre
             && x.AdDate == adDate
@@ -104,7 +116,7 @@ public class AdService : IAdService
         return result.DeletedCount;
     }
 
-    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre, string productId)
+    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre)
     {
         // Define the date range
         DateTime startDate = DateTime.Now.AddDays(1);
@@ -190,7 +202,7 @@ public class AdService : IAdService
             {
                 if(category["category"].AsInt32 == (int) genre)
                 {
-                    adDates.Add(new AdAvailability { Price = 0, AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
+                    adDates.Add(new AdAvailability { AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
                 }
             }
         }
@@ -201,23 +213,10 @@ public class AdService : IAdService
             var count = result != null ? MAX_AD_PER_DAY - result.Count : MAX_AD_PER_DAY;
             return new AdAvailability
             {
-                Price = GetPrice(genre, count, 0), 
                 AdDate = date,
                 Count = count
             };
         }).ToList();
         return res;
-    }
-
-    private double GetPrice(Genre genre, int remainingAds, double productPrice)
-    {
-        switch(genre)
-        {
-            case Genre.MysteryThriller:
-
-                return 50;
-            default:
-                return 10;
-        }
     }
 }

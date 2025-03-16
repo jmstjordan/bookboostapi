@@ -12,15 +12,13 @@ public class AdController : ControllerBase
 
     private IAdService _adService;
 
-    private IProductService _productService;
 
     private IAppEmailService _emailService;
 
-    public AdController(ILogger<AdController> logger, IAdService adService, IProductService productService, IAppEmailService emailService)
+    public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService)
     {
         _logger = logger;
         _adService = adService;
-        _productService = productService;
         _emailService = emailService;
     }
  
@@ -29,25 +27,36 @@ public class AdController : ControllerBase
     {
         try
         {
-            var product = await _productService.GetProduct(ad.ProductId);
-            if(product == null)
-            {
-                return BadRequest("Invalid Product Id");
-            }
             var createdAd = await _adService.CreateAd(ad, "jmjordan");
             await _emailService.SendAdCreated("jmstjordan");
             return Created(createdAd.Id.ToString(), createdAd);
         }
-        catch(ConflictException)
+        catch(NotImplementedException e)
         {
-            return BadRequest("Ad already exists");
+            return BadRequest(e.Message);
+        }
+        catch(ConflictException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch(Exception e)
+        {
+            _logger.LogError(e.StackTrace);
+            return StatusCode(500);
         }
     }
 
-    [HttpGet]
-    public async Task<IEnumerable<Ad>> GetAds()
+    [HttpGet("test")]
+    public async Task<IActionResult> Test()
     {
-        return await _adService.GetAds("jmjordan");
+        _logger.LogInformation("Tester");
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAds()
+    {
+        return Ok(await _adService.GetAds("jmjordan"));
     }
 
     [HttpGet("{id}")]
@@ -92,9 +101,9 @@ public class AdController : ControllerBase
         return result != null ? Ok(result) : BadRequest();
     }
 
-    [HttpGet("Availability/{genre}/Product/{id}")]
-    public async Task<ActionResult> GetAvailableDates(Genre genre, string id)
+    [HttpGet("Availability/{genre}")]
+    public async Task<ActionResult> GetAvailableDates(Genre genre)
     {
-        return Ok(await _adService.AvailableAdDates(genre, id));
+        return Ok(await _adService.AvailableAdDates(genre));
     }
 }

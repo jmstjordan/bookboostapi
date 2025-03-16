@@ -5,16 +5,11 @@ namespace BookBoostApi.Models;
 
 public class AdUpload
 {
-    public DateOnly? AdDate { get; set; }
+    public required DateOnly AdDate { get; set; }
+
+    public required ProductUpload ProductUpload { get; set; } 
 
     public required Genre Genre { get; set; }
-
-    // Not to be confused with ProductId on the Product, this is the Product's Id... :(
-    public required string ProductId { get; set; }
-
-    public Tier? Tier { get; set; }
-
-    public AdState? State { get; set; }
 }
 
 public class AdPatch
@@ -28,16 +23,23 @@ public enum Tier
     Ambassador = 2
 }
 
-public class Ad : AdUpload
+public class Ad
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
+    public required DateOnly AdDate { get; set; }
+
     public required string User { get; set; }
 
-    public DateOnly Created { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public required Product Product { get; set; }
 
+    public required DateOnly Created { get; set; }
+    
+    public required AdState State { get; set; } 
+
+    public required Genre Genre { get; set; }
 }
 
 public enum AdState
@@ -53,5 +55,5 @@ public class AdAvailability
 
     public required int Count { get; set; }
 
-    public required double Price { get; set; }
+    // public Dictionary<Genre, double>? Price { get; set; }
 }
