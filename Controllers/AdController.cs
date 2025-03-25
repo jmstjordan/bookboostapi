@@ -12,15 +12,13 @@ public class AdController : ControllerBase
 
     private IAdService _adService;
 
-    private IProductService _productService;
 
     private IAppEmailService _emailService;
 
-    public AdController(ILogger<AdController> logger, IAdService adService, IProductService productService, IAppEmailService emailService)
+    public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService)
     {
         _logger = logger;
         _adService = adService;
-        _productService = productService;
         _emailService = emailService;
     }
  
@@ -29,29 +27,36 @@ public class AdController : ControllerBase
     {
         try
         {
-            if(ad.AdDate == null || ad.Genre == null || ad.Tier == null || ad.ProductId == null)
-            {
-                return BadRequest("Ad requires AdDate, Genre, Tier, and ProductId fields");
-            }
-            var product = await _productService.GetProduct(ad.ProductId);
-            if(product == null)
-            {
-                return BadRequest("Invalid Product Id");
-            }
             var createdAd = await _adService.CreateAd(ad, "jmjordan");
             await _emailService.SendAdCreated("jmstjordan");
             return Created(createdAd.Id.ToString(), createdAd);
         }
-        catch(ConflictException)
+        catch(NotImplementedException e)
         {
-            return BadRequest("Ad already exists");
+            return BadRequest(e.Message);
+        }
+        catch(ConflictException e)
+        {
+            return BadRequest(e.Message);
+        }
+        catch(Exception e)
+        {
+            _logger.LogError(e.StackTrace);
+            return StatusCode(500);
         }
     }
 
-    [HttpGet]
-    public async Task<IEnumerable<Ad>> GetAds()
+    [HttpGet("test")]
+    public async Task<IActionResult> Test()
     {
-        return await _adService.GetAds("jmjordan");
+        _logger.LogInformation("Tester");
+        return Ok();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> GetAds()
+    {
+        return Ok(await _adService.GetAds("jmjordan"));
     }
 
     [HttpGet("{id}")]
@@ -73,23 +78,14 @@ public class AdController : ControllerBase
     }
 
     [HttpPatch("{id}")]
-    public async Task<ActionResult> UpdateAd(string id, [FromBody] AdUpload ad)
+    public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
-        // TODO: if admin, ad bypass
         var existingAd = await _adService.GetAd("jmjordan", id);
         if(existingAd == null)
         {
             return NotFound("Ad not found");
         }
-        if(ad.Genre != null)
-            existingAd.Genre = ad.Genre;
-        if(ad.Tier != null)
-            existingAd.Tier = ad.Tier;
-        if(ad.AdDate != null)
-            existingAd.AdDate = ad.AdDate;
-        if(ad.ProductId != null)
-            existingAd.ProductId = ad.ProductId;
-        if(true && ad.State != null){
+        if(true){
             // if we are an admin
             if(ad.State == AdState.Accepted)
             {
@@ -105,9 +101,9 @@ public class AdController : ControllerBase
         return result != null ? Ok(result) : BadRequest();
     }
 
-    [HttpGet("Available/{tier}")]
-    public async Task<ActionResult> GetAvailableDates(Tier tier)
+    [HttpGet("Availability/{genre}")]
+    public async Task<ActionResult> GetAvailableDates(Genre genre)
     {
-        return Ok(await _adService.AvailableAdDates(tier));
+        return Ok(await _adService.AvailableAdDates(genre));
     }
 }

@@ -69,12 +69,12 @@ public class RainforestService : IAmazonProductService
 
 
         // TODO: Consider cancelation token from client here as a param
-        RainforestSearchResponse response;
+        RainforestSearchResponse? response;
         try
         {
             response = await client.GetAsync<RainforestSearchResponse>(request);
         }
-        catch(HttpRequestException e)
+        catch(HttpRequestException)
         {
             return new List<Product>();
         }

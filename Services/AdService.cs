@@ -1,6 +1,7 @@
 namespace BookBoostApi.Services;
 
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
@@ -10,13 +11,15 @@ using MongoDB.Driver;
 public class AdService : IAdService
 {
     private readonly IMongoCollection<Ad> _adsCollection;
+    private IProductService _productService;
     private const int LENGTH_OF_AD_CALENDER = 90;
     private const int MAX_AD_PER_DAY = 10;
 
-    public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings)
+    public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IProductService productService)
     {
         // _amazonProductService = amazonProductService;
         // // and any other products, apple, google, barns and noble, etc.
+        _productService = productService;
 
         var mongoClient = new MongoClient(
             bookBoostDatabaseSettings.Value.ConnectionString);
@@ -30,26 +33,57 @@ public class AdService : IAdService
 
     public async Task<Ad> CreateAd(AdUpload ad, string user)
     {
-        if(AdExistsByUser("jmjordan", ad.ProductId, ad.AdDate, ad.Genre))
+        var product = await _productService.GetProduct(ad.ProductUpload);
+        if(AdExistsByUser("jmjordan", product.ProductId, ad.AdDate, ad.Genre))
         {
             throw new ConflictException("Ad already exists");
+        }
+        if(!await AdDateEligible(ad.Genre, ad.AdDate))
+        {
+            throw new ConflictException("Ad Date not available");
         }
         var newAd = new Ad 
         {
             Genre = ad.Genre,
-            ProductId = ad.ProductId,
+            Product = product,
             AdDate = ad.AdDate,
-            Tier = ad.Tier,
             User = user,
-            State = AdState.Pending
+            State = AdState.Pending,
+            Created = DateOnly.FromDateTime(DateTime.Now)
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 
     }
 
-    private bool AdExistsByUser(string? user, string? productId, DateOnly? adDate, Genre? genre)
+    private async Task<bool> AdDateEligible(Genre genre, DateOnly adDate)
     {
-        return _adsCollection.CountDocuments(x => x.ProductId == productId 
+        var dates = await AvailableAdDates(genre);
+        foreach(AdAvailability date in dates)
+        {
+            if(DateOnly.Parse(date.AdDate) == adDate)
+            {
+                return date.Count > 0;
+            }
+        }
+        return false;
+    }
+
+    private async Task<DateOnly> AssignAdDate(Genre genre)
+    {
+        var dates = await AvailableAdDates(genre);
+        foreach(AdAvailability date in dates)
+        {
+            if(date.Count > 0)
+            {
+                return DateOnly.Parse(date.AdDate);
+            }
+        }
+        throw new Exception("Unable to find Ad Date");
+    }
+
+    private bool AdExistsByUser(string user, string productId, DateOnly adDate, Genre genre)
+    {
+        return _adsCollection.CountDocuments(x => x.Product.ProductId == productId 
             && x.User == user 
             && x.Genre == genre
             && x.AdDate == adDate
@@ -82,10 +116,10 @@ public class AdService : IAdService
         return result.DeletedCount;
     }
 
-    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Tier tier)
+    public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre)
     {
         // Define the date range
-        DateTime startDate = DateTime.Now.AddDays(7);
+        DateTime startDate = DateTime.Now.AddDays(1);
         DateTime endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
 
         var allDates = Enumerable.Range(0, (endDate - startDate).Days)
@@ -103,7 +137,7 @@ public class AdService : IAdService
                         { "date", "$AdDate" }
                     })
                 },
-                { "categoryField", "$Tier" }  // Replace 'yourField' with the field you want to bucket by
+                { "categoryField", "$Genre" }  // Replace 'yourField' with the field you want to bucket by
             }),
 
             // Step 2: Match documents within the date range
@@ -166,7 +200,8 @@ public class AdService : IAdService
         {
             foreach (var category in result["counts"].AsBsonArray)
             {
-                if(category["category"].AsInt32 == (int) tier){
+                if(category["category"].AsInt32 == (int) genre)
+                {
                     adDates.Add(new AdAvailability { AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
                 }
             }
@@ -175,10 +210,11 @@ public class AdService : IAdService
         var res = allDates.Select(date =>
         {
             var result = adDates.FirstOrDefault(r => r.AdDate == date);
+            var count = result != null ? MAX_AD_PER_DAY - result.Count : MAX_AD_PER_DAY;
             return new AdAvailability
             {
                 AdDate = date,
-                Count = result != null ? MAX_AD_PER_DAY - result.Count : MAX_AD_PER_DAY
+                Count = count
             };
         }).ToList();
         return res;
