@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -27,6 +28,7 @@ public class Ad
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
+    [JsonIgnore]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     public required DateOnly AdDate { get; set; }
@@ -44,9 +46,9 @@ public class Ad
 
 public enum AdState
 {
-    Pending = 0,
-    Declined = 1,
-    Accepted = 2
+    Pending = 1,
+    Declined = 2,
+    Accepted = 3
 }
 
 public class AdAvailability
