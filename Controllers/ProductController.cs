@@ -5,7 +5,7 @@ using BookBoostApi.Interfaces;
 namespace BookBoostApi.Controllers;
 
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class ProductController : ControllerBase
 {
     private readonly ILogger<ProductController> _logger;
