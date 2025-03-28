@@ -31,7 +31,7 @@ public class AdService : IAdService
             bookBoostDatabaseSettings.Value.AdsCollectionName);
     }
 
-    public async Task<Ad> CreateAd(AdUpload ad, string user)
+    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string user)
     {
         var product = await _productService.GetProduct(ad.ProductUpload);
         if(AdExistsByUser("jmjordan", product.ProductId, ad.AdDate, ad.Genre))
@@ -49,6 +49,8 @@ public class AdService : IAdService
             AdDate = ad.AdDate,
             User = user,
             State = AdState.Pending,
+            SessionId = sessionId,
+            Paid = false,
             Created = DateOnly.FromDateTime(DateTime.Now)
         };
         await _adsCollection.InsertOneAsync(newAd);
@@ -108,6 +110,18 @@ public class AdService : IAdService
             return await GetAd(ad.User, ad.Id.ToString());
         }
         return null;
+    }
+
+    public async Task<bool> ConfirmPaymentAd(string sessionId, string user)
+    {
+        var filter = Builders<Ad>.Filter.And(
+            Builders<Ad>.Filter.Eq("SessionId", sessionId),
+            Builders<Ad>.Filter.Eq("User", user)
+        );
+        var update = Builders<Ad>.Update.Set("Paid", true);
+
+        var result = await _adsCollection.UpdateOneAsync(filter, update);
+        return result.ModifiedCount == 1;
     }
 
     public async Task<long> DeleteAd(string user, string id)

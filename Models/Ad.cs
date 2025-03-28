@@ -42,6 +42,10 @@ public class Ad
     public required AdState State { get; set; } 
 
     public required Genre Genre { get; set; }
+
+    public required string SessionId { get; set; }
+
+    public required bool Paid { get; set; }
 }
 
 public enum AdState
@@ -50,6 +54,7 @@ public enum AdState
     Declined = 2,
     Accepted = 3
 }
+
 
 public class AdAvailability
 {

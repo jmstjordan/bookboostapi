@@ -31,6 +31,10 @@ builder.Services.Configure<OpenAiSettings>(
     builder.Configuration.GetSection("OpenAiSettings")
 );
 
+builder.Services.Configure<PaymentSettings>(
+    builder.Configuration.GetSection("PaymentSettings")
+);
+
 builder.Services.AddTransient<IAmazonProductService, RainforestService>();
 builder.Services.AddTransient<IEmailService, AmazonEmailService>();
 builder.Services.AddTransient<ITemplateService, FluidService>();
@@ -38,6 +42,8 @@ builder.Services.AddTransient<IAiService, OpenAiService>();
 builder.Services.AddTransient<IAppEmailService, AppEmailService>();
 builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IAdService, AdService>();
+builder.Services.AddSingleton<IPriceService, PriceService>();
+builder.Services.AddSingleton<IPaymentService, StripeService>();
 
 // var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>

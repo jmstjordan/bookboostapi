@@ -1,8 +1,10 @@
 
+using BookBoostApi.Models;
+
 namespace BookBoostApi.Interfaces;
 
 public interface IPaymentService
 {
-    public Task<string> CreatePayment(PaymentRequest request);
+    public string CreateAdCheckoutSession(AdUpload ad, string requestHost);
 }
 
