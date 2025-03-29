@@ -18,5 +18,7 @@ public interface IAdService
 
     public Task<bool> ConfirmPaymentAd(string sessionId, string user);
 
+    public Task<Ad> GetAdBySessionId(string user, string sessionId);
+
 }
 

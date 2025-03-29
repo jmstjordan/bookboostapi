@@ -12,13 +12,11 @@ public class ProductController : ControllerBase
 
     private IProductService _productService;
 
-    private IAiService _aiService;
 
-    public ProductController(ILogger<ProductController> logger, IProductService productService, IAiService aiService)
+    public ProductController(ILogger<ProductController> logger, IProductService productService)
     {
         _logger = logger;
         _productService = productService;
-        _aiService = aiService;
     }
 
     [HttpGet]

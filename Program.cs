@@ -40,10 +40,11 @@ builder.Services.AddTransient<IEmailService, AmazonEmailService>();
 builder.Services.AddTransient<ITemplateService, FluidService>();
 builder.Services.AddTransient<IAiService, OpenAiService>();
 builder.Services.AddTransient<IAppEmailService, AppEmailService>();
+builder.Services.AddTransient<IPaymentService, StripeService>();
 builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IAdService, AdService>();
 builder.Services.AddSingleton<IPriceService, PriceService>();
-builder.Services.AddSingleton<IPaymentService, StripeService>();
+builder.Services.AddSingleton<IUserService, UserService>();
 
 // var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>

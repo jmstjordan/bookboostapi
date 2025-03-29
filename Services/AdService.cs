@@ -102,6 +102,11 @@ public class AdService : IAdService
         return await _adsCollection.Find(x => x.User == user && x.Id == adId).FirstOrDefaultAsync();
     }
 
+    public async Task<Ad> GetAdBySessionId(string user, string sessionId)
+    {
+        return await _adsCollection.Find(x => x.User == user && x.SessionId == sessionId).FirstOrDefaultAsync();
+    }
+
     public async Task<Ad> UpdateAd(Ad ad)
     {
         var result = await _adsCollection.ReplaceOneAsync(x => x.Id == ad.Id && x.User == ad.User, ad);

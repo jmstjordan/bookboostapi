@@ -63,30 +63,18 @@ public class PaymentController : ControllerBase
     [HttpGet("VerifySession/{sessionId}")]
     public async Task<IActionResult> VerifySession(string sessionId)
     {
-        try
+        var result = _paymentService.VerifySession(sessionId);
+        if(result)
         {
-            var service = new SessionService();
-            var session = service.Get(sessionId);
-
-            // Check if the payment was successful
-            if (session.PaymentStatus == "paid")
+            var confirmed = await _adService.ConfirmPaymentAd(sessionId, "jmjordan");
+            if(confirmed)
             {
-                var confirmed = await _adService.ConfirmPaymentAd(sessionId, "jmjordan");
-                if(confirmed)
-                {
-                    await _emailService.SendAdCreated("jmstjordan");
-                }
-                return Ok(new {paymentSucceeded = true});
+                await _emailService.SendAdCreated("jmstjordan");
             }
-            else
-            {
-                return Ok(new {paymentSucceeded = false});
-            }
+            var ad = await _adService.GetAdBySessionId("jmjordan", sessionId);
+            return Ok(ad);
         }
-        catch (StripeException e)
-        {
-            return BadRequest(e.StripeError.Message);
-        }
+        return NoContent();
     }
 
     [HttpGet("Prices")]

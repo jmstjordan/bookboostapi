@@ -59,4 +59,11 @@ public class StripeService : IPaymentService
         var session = service.Create(options);
         return session.Id;
     }
+
+    public bool VerifySession(string sessionId)
+    {
+        var service = new SessionService();
+        var session = service.Get(sessionId);
+        return session.PaymentStatus == "paid";
+    }
 }

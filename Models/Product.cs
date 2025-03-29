@@ -1,8 +1,5 @@
 namespace BookBoostApi.Models;
 
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-
 public enum ProductSource
 {
     Amazon = 1
