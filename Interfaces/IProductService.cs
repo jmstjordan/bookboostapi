@@ -9,5 +9,7 @@ public interface IProductService
 
     public Task<Product> GetProduct(ProductUpload product);
 
+    public IEnumerable<ProductSource> GetProductSources();
+
 }
 

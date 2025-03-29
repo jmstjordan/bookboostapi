@@ -31,4 +31,10 @@ public class ProductController : ControllerBase
         var result = await _productService.GetProduct(productUpload);
         return result != null ? Ok(result) : NotFound();
     }
+
+    [HttpGet("Sources")]
+    public ActionResult GetProductSources()
+    {
+        return Ok(_productService.GetProductSources());
+    }
 }

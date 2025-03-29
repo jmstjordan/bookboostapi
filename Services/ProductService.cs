@@ -64,4 +64,9 @@ public class ProductService : IProductService
         _logger.LogInformation($"Cache Hit {key}");
         return cacheValue;
     }
+
+    public IEnumerable<ProductSource> GetProductSources()
+    {
+        return (ProductSource[])Enum.GetValues(typeof(ProductSource));
+    }
 }

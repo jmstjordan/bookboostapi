@@ -99,4 +99,10 @@ public class AdController : ControllerBase
     {
         return Ok(await _adService.AvailableAdDates(genre));
     }
+
+    [HttpGet("Genres")]
+    public ActionResult GetGenres()
+    {
+        return Ok(_adService.GetGenres());
+    }
 }

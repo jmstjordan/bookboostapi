@@ -20,5 +20,7 @@ public interface IAdService
 
     public Task<Ad> GetAdBySessionId(string user, string sessionId);
 
+    public IEnumerable<Genre> GetGenres();
+
 }
 

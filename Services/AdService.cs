@@ -92,6 +92,11 @@ public class AdService : IAdService
         ) > 0;
     }
 
+    public IEnumerable<Genre> GetGenres()
+    {
+        return (Genre[])Enum.GetValues(typeof(Genre));
+    }
+
     public async Task<IEnumerable<Ad>> GetAds(string user)
     {
         return await _adsCollection.Find(x => x.User == user).ToListAsync();
