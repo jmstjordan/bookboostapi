@@ -1,14 +1,16 @@
+using BookBoostApi.Models;
+
 namespace BookBoostApi.Interfaces;
 
 public interface IAppEmailService
 {
-    public Task<bool> SendAdCreated(string user);
+    public Task<bool> SendAdCreated(string userId);
 
-    public Task<bool> SendAdAccepted(string user);
+    public Task<bool> SendAdAccepted(string userId);
 
-    public Task<bool> SendAdDeclined(string user);
+    public Task<bool> SendAdDeclined(string userId);
 
-    public Task<bool> SendUserCreated(string user);
+    public Task<bool> SendUserCreated(User user);
 
-    public Task<bool> SendPromotionJoined(string user);
+    public Task<bool> SendPromotionJoined(string userId);
 }

@@ -15,6 +15,8 @@ public class User
 
     public required string UserId { get; set; }
 
+    public required string EmailAddress {get; set; }
+
     public ReaderConfig? ReaderConfig { get; set; }
 
     public AuthorConfig? AuthorConfig { get; set; }
@@ -23,7 +25,7 @@ public class User
 
 public class ReaderConfig
 {
-    public required Genre[] Genres { get; set; }
+    public Genre[]? Genres { get; set; }
 }
 
 public class AuthorConfig

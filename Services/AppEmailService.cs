@@ -9,12 +9,14 @@ public class AppEmailService : IAppEmailService
 {
     private IEmailService _emailService;
     private ITemplateService _templateService;
+    private IUserService _userService;
     private IMongoCollection<NotificationTemplate> _templatesCollection;
 
-    public AppEmailService(IEmailService emailService, ITemplateService templateService, IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings)
+    public AppEmailService(IEmailService emailService, ITemplateService templateService, IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IUserService userService)
     {
         _emailService = emailService;
         _templateService = templateService;
+        _userService = userService;
 
         var mongoClient = new MongoClient(
             bookBoostDatabaseSettings.Value.ConnectionString);
@@ -33,33 +35,34 @@ public class AppEmailService : IAppEmailService
         return await _emailService.EmailAsync("jmstjordan@gmail.com", templateDoc.Subject, body);
     }
 
-    public async Task<bool> SendAdCreated(string user)
+    public async Task<bool> SendAdCreated(string userId)
     {
-        // look up user email
+        // look up userId email
         return await RenderAndSend(TemplateType.AdCreated, new { Firstname = "Bill", Lastname = "Gates" });
     }
 
-    public async Task<bool> SendAdAccepted(string user)
+    public async Task<bool> SendAdAccepted(string userId)
     {
-        // look up user email
+        // look up userId email
         return await RenderAndSend(TemplateType.AdAccepted, new { Firstname = "Bill", Lastname = "Gates" });
     }
 
-    public async Task<bool> SendAdDeclined(string user)
+    public async Task<bool> SendAdDeclined(string userId)
     {
-        // look up user email
+        // look up userId email
         return await RenderAndSend(TemplateType.AdDeclined, new { Firstname = "Bill", Lastname = "Gates" });
     }
 
-    public async Task<bool> SendUserCreated(string user)
+    public async Task<bool> SendUserCreated(User user)
     {
-        // look up user email
+        // look up userId email
+        // var user = await _userService.GetUser(userId);
         return await RenderAndSend(TemplateType.UserCreated, new { Firstname = "Bill", Lastname = "Gates" });
     }
 
-    public async Task<bool> SendPromotionJoined(string user)
+    public async Task<bool> SendPromotionJoined(string userId)
     {
-        // look up user email
+        // look up userId email
         return await RenderAndSend(TemplateType.PromotionJoined, new { Firstname = "Bill", Lastname = "Gates" });
     }
 }

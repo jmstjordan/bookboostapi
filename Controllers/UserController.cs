@@ -20,9 +20,16 @@ public class UserController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> UpsertUser([FromBody] User user)
+    public async Task<IActionResult> Upsert([FromBody] User user)
     {
+        var checkUser = await _userService.GetUser(user.UserId);
+        user.Id = checkUser.Id;
         await _userService.UpsertUser(user);
+        if(checkUser == null)
+        {
+            // new user, send email
+            await _emailService.SendUserCreated(user);
+        }
         return Ok();
     }
 
