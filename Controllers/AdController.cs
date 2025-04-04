@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookBoostApi.Controllers;
 
@@ -47,12 +48,14 @@ public class AdController : ControllerBase
     // }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetAds()
     {
         return Ok(await _adService.GetAds("jmjordan"));
     }
 
     [HttpGet("{id}")]
+    [Authorize]
     public async Task<IActionResult> GetAd(string id)
     {
         var result = await _adService.GetAd("jmjordan", id);
@@ -64,6 +67,7 @@ public class AdController : ControllerBase
     }
     
     [HttpDelete("{id}")]
+    [Authorize]
     public async Task<IActionResult> DeleteAd(string id)
     {
         var count = await _adService.DeleteAd("jmjordan", id);
@@ -71,6 +75,7 @@ public class AdController : ControllerBase
     }
 
     [HttpPatch("{id}")]
+    [Authorize]
     public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
         var existingAd = await _adService.GetAd("jmjordan", id);
@@ -95,12 +100,14 @@ public class AdController : ControllerBase
     }
 
     [HttpGet("Availability/{genre}")]
+    [Authorize]
     public async Task<ActionResult> GetAvailableDates(Genre genre)
     {
         return Ok(await _adService.AvailableAdDates(genre));
     }
 
     [HttpGet("Genres")]
+    [Authorize]
     public ActionResult GetGenres()
     {
         return Ok(_adService.GetGenres());

@@ -8,27 +8,28 @@ public class User
 {
     [BsonId]
     [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-    [JsonIgnore]
+    // [JsonIgnore]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
-    public required string Username { get; set; }
+    public string Username { get; set; }
 
-    public required string UserId { get; set; }
+    public required string Email { get; set; }
 
-    public required string EmailAddress {get; set; }
+    public required string PasswordHash { get; set;}
 
-    public ReaderConfig? ReaderConfig { get; set; }
+    public Role[] Roles { get; set; } = [Role.Reader];
 
-    public AuthorConfig? AuthorConfig { get; set; }
+    public Preferences? Preferences { get; set; }
 
 }
 
-public class ReaderConfig
+public class Preferences
 {
     public Genre[]? Genres { get; set; }
 }
 
-public class AuthorConfig
+public enum Role
 {
-
+    Reader = 1,
+    Author = 2
 }

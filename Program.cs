@@ -3,6 +3,9 @@ using BookBoostApi.Services;
 using BookBoostApi.Models;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,21 +21,20 @@ builder.Services.AddApplicationInsightsTelemetry();
 builder.Services.Configure<BookBoostDatabaseSettings>(
     builder.Configuration.GetSection("BookBoostDatabase")
 );
-
 builder.Services.Configure<RainforestSettings>(
     builder.Configuration.GetSection("RainforestSettings")
 );
-
 builder.Services.Configure<NotificationSettings>(
     builder.Configuration.GetSection("NotificationSettings")
 );
-
 builder.Services.Configure<OpenAiSettings>(
     builder.Configuration.GetSection("OpenAiSettings")
 );
-
 builder.Services.Configure<PaymentSettings>(
     builder.Configuration.GetSection("PaymentSettings")
+);
+builder.Services.Configure<AuthSettings>(
+    builder.Configuration.GetSection("AuthSettings")
 );
 
 builder.Services.AddTransient<IAmazonProductService, RainforestService>();
@@ -45,6 +47,7 @@ builder.Services.AddSingleton<IProductService, ProductService>();
 builder.Services.AddSingleton<IAdService, AdService>();
 builder.Services.AddSingleton<IPriceService, PriceService>();
 builder.Services.AddSingleton<IUserService, UserService>();
+builder.Services.AddSingleton<IAuthService, AuthService>();
 
 // var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
@@ -63,6 +66,36 @@ builder.Services.AddControllers().AddJsonOptions(o =>
     o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 });
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        // The key used to sign the token (same key you used to sign it in the first place)
+        var key = Encoding.UTF8.GetBytes(builder.Configuration["AuthSettings:SecretKey"]);
+
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            // Validate the issuer (should match the issuer in your JWT)
+            ValidateIssuer = true,
+            ValidIssuer = builder.Configuration["AuthSettings:Audience"], // Example: api://my-custom-api
+
+            // Validate the audience (should match the audience in your JWT)
+            ValidateAudience = true,
+            ValidAudience = builder.Configuration["AuthSettings:Audience"], // Example: api://my-custom-api
+
+            // Validate the token expiration (exp claim)
+            ValidateLifetime = true,
+
+            // Set the key used to validate the JWT
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+        };
+
+        options.SaveToken = true; // Save the JWT token in the HTTP context
+    });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ApiAccess", policy => policy.RequireAuthenticatedUser());
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -76,6 +109,7 @@ app.UseCors();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

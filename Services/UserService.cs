@@ -20,15 +20,25 @@ public class UserService : IUserService
         _usersCollection = mongoDatabase.GetCollection<User>(
             bookBoostDatabaseSettings.Value.UsersCollectionName);
     }
-  
-    public async Task<User> GetUser(string userId)
+
+    public async Task CreatUser(User user)
     {
-        return await _usersCollection.Find(x => x.UserId == userId).FirstOrDefaultAsync();
+        await _usersCollection.InsertOneAsync(user);
     }
 
-    public async Task UpsertUser(User user)
+    public async Task<User> GetUser(string username)
     {
-        var filter = Builders<User>.Filter.Eq(x => x.UserId, user.UserId);
-        await _usersCollection.ReplaceOneAsync(filter, user, new ReplaceOptions { IsUpsert = true });
+        return await _usersCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
     }
+
+    public async Task<User> GetUserbyEmail(string email)
+    {
+        return await _usersCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
+    }
+
+    // public async Task UpsertUser(User user)
+    // {
+    //     var filter = Builders<User>.Filter.Eq(x => x.UserId, user.UserId);
+    //     await _usersCollection.ReplaceOneAsync(filter, user, new ReplaceOptions { IsUpsert = true });
+    // }
 }
