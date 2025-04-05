@@ -1,11 +1,11 @@
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
-using MongoDB.Driver;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace BookBoostApi.Services;
 
@@ -15,14 +15,17 @@ public class AuthService : IAuthService
 
     private readonly string _issuer;
 
+    IRefreshTokenService _refreshTokenService;
 
-    public AuthService(IOptions<AuthSettings> authSettings)
+
+    public AuthService(IOptions<AuthSettings> authSettings, IRefreshTokenService refreshTokenService)
     {
         _secretKey = authSettings.Value.SecretKey;
         _issuer = authSettings.Value.Audience;
+        _refreshTokenService = refreshTokenService;
     }
 
-    public string GenerateJwtToken(User user)
+    public string GenerateAccessToken(User user)
     {
         var claims = new[]
         {
@@ -39,10 +42,22 @@ public class AuthService : IAuthService
             issuer: _issuer,
             audience: _issuer,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1),
+            expires: DateTime.UtcNow.AddMinutes(1),
             signingCredentials: creds
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    public async Task<RefreshToken> GenerateRefreshToken(User user)
+    {
+        var refreshToken = new RefreshToken
+        {
+            Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
+            Expires = DateTime.UtcNow.AddDays(7),
+            UserId = user.Id
+        };
+        await _refreshTokenService.AddToken(refreshToken);
+        return refreshToken;
     }
 }

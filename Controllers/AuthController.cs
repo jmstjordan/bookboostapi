@@ -6,15 +6,17 @@ using BookBoostApi.Models;
 [ApiController]
 public class AuthController : ControllerBase
 {
-
     IUserService _userService;
 
     IAuthService _authService;
 
-    public AuthController(IUserService userService, IAuthService authService)
+    IRefreshTokenService _refreshTokenService;
+
+    public AuthController(IUserService userService, IAuthService authService, IRefreshTokenService refreshTokenService)
     {
         _userService = userService;
         _authService = authService;
+        _refreshTokenService = refreshTokenService;
     }
 
     [HttpPost("Signup")]
@@ -32,8 +34,14 @@ public class AuthController : ControllerBase
             PasswordHash = hashedPassword
         };
         await _userService.CreatUser(user);
-        var token = _authService.GenerateJwtToken(user);
-        return Ok(new { token });
+        var newAccessToken = _authService.GenerateAccessToken(user);
+        var newRefreshToken = await _authService.GenerateRefreshToken(user);
+
+        return Ok(new
+        {
+            access_token = newAccessToken,
+            refresh_token = newRefreshToken.Token
+        });
     }
 
 
@@ -47,7 +55,38 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid username or password.");
         }
 
-        var token = _authService.GenerateJwtToken(user);
-        return Ok(new { token });
+        var newAccessToken = _authService.GenerateAccessToken(user);
+        var newRefreshToken = await _authService.GenerateRefreshToken(user);
+
+        return Ok(new
+        {
+            access_token = newAccessToken,
+            refresh_token = newRefreshToken.Token
+        });
+    }
+
+    [HttpPost("Refresh")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+    {
+        var storedToken = await _refreshTokenService.GetToken(request);
+        if (storedToken == null || storedToken.IsExpired)
+        {
+            return Unauthorized("Invalid or expired refresh token");
+        }
+        var user = await _userService.GetUser(storedToken.UserId);
+        if (user == null)
+        {
+            return Unauthorized("User not found");
+        }
+        await _refreshTokenService.RevokeToken(storedToken);
+
+        var newAccessToken = _authService.GenerateAccessToken(user);
+        var newRefreshToken = await _authService.GenerateRefreshToken(user);
+
+        return Ok(new
+        {
+            access_token = newAccessToken,
+            refresh_token = newRefreshToken.Token
+        });
     }
 }
