@@ -27,8 +27,6 @@ public class Product
 
     public string? Image { get; set; }
 
-    public string? User { get; set; }
-
     public string GetCacheKey()
     {
         return this.ProductId + this.ProductSource;

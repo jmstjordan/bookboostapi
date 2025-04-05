@@ -36,7 +36,6 @@ public class ProductService : IProductService
                     {
                         amazonProduct.DescriptionView = await _aiService.TrimDescription(amazonProduct.Description, 250);
                     }
-                    amazonProduct.User = "jmjordan";
                     _memoryCache.Set(key, amazonProduct, new MemoryCacheEntryOptions()
                         .SetSlidingExpiration(TimeSpan.FromDays(1)));
                     return amazonProduct;

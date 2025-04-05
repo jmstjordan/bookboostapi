@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookBoostApi.Controllers;
 
@@ -8,24 +9,23 @@ namespace BookBoostApi.Controllers;
 [Route("api/[controller]")]
 public class ProductController : ControllerBase
 {
-    private readonly ILogger<ProductController> _logger;
-
     private IProductService _productService;
 
 
-    public ProductController(ILogger<ProductController> logger, IProductService productService)
+    public ProductController(IProductService productService)
     {
-        _logger = logger;
         _productService = productService;
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IEnumerable<Product>> GetProducts([FromQuery] ProductSearch productSearch)
     {
         return await _productService.GetProducts(productSearch);
     }
 
     [HttpPost]
+    [Authorize]
     public async Task<IActionResult> GetProduct([FromBody] ProductUpload productUpload)
     {
         var result = await _productService.GetProduct(productUpload);
@@ -33,6 +33,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet("Sources")]
+    [Authorize]
     public ActionResult GetProductSources()
     {
         return Ok(_productService.GetProductSources());

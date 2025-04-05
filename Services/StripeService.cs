@@ -44,8 +44,8 @@ public class StripeService : IPaymentService
                 }
             },
             Mode = "payment",
-            SuccessUrl = $"{requestHost}/success/6cddacf31698df7f17806e5de5a157e7?session_id={{CHECKOUT_SESSION_ID}}",
-            CancelUrl = $"{requestHost}/author/6cddacf31698df7f17806e5de5a157e7",
+            SuccessUrl = $"{requestHost}/success?session_id={{CHECKOUT_SESSION_ID}}",
+            CancelUrl = $"{requestHost}/author",
             Metadata = new Dictionary<string, string>
             {
                 { "ProductId", ad.ProductUpload.ProductId },

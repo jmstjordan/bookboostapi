@@ -9,14 +9,10 @@ namespace BookBoostApi.Controllers;
 [Route("api/[controller]")]
 public class UserController : ControllerBase
 {
-    private readonly ILogger<AdController> _logger;
-    private IAppEmailService _emailService;
     private IUserService _userService;
 
-    public UserController(ILogger<AdController> logger, IAppEmailService emailService, IUserService userService)
+    public UserController(IUserService userService)
     {
-        _logger = logger;
-        _emailService = emailService;
         _userService = userService;
     }
 

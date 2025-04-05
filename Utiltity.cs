@@ -8,6 +8,11 @@ public static class Utility
         return context.User.Claims.FirstOrDefault(c => c.Type == CustomClaimTypes.UserId)?.Value;
     }
 
+    public static string GetRequestHost(this HttpContext context)
+    {
+        return context.Request.Headers["Origin"].FirstOrDefault();
+    }
+
     public static string GetUsername(this string email)
     {
         if (string.IsNullOrWhiteSpace(email) || !email.Contains("@"))

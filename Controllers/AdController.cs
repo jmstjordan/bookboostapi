@@ -78,7 +78,8 @@ public class AdController : ControllerBase
     [Authorize]
     public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
-        var existingAd = await _adService.GetAd(HttpContext.GetUserId(), id);
+        var userId = HttpContext.GetUserId();
+        var existingAd = await _adService.GetAd(userId, id);
         if(existingAd == null)
         {
             return NotFound("Ad not found");
@@ -87,11 +88,11 @@ public class AdController : ControllerBase
             // if we are an admin
             if(ad.State == AdState.Accepted)
             {
-                await _emailService.SendAdAccepted("jmjordan");
+                await _emailService.SendAdAccepted(userId);
             }
             else if(ad.State == AdState.Declined)
             {
-                await _emailService.SendAdDeclined("jmjordan");
+                await _emailService.SendAdDeclined(userId);
             }
             existingAd.State = ad.State;
         }

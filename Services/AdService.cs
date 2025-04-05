@@ -34,7 +34,7 @@ public class AdService : IAdService
     public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId)
     {
         var product = await _productService.GetProduct(ad.ProductUpload);
-        if(AdExistsByUser("jmjordan", product.ProductId, ad.AdDate, ad.Genre))
+        if(AdExistsByUser(userId, product.ProductId, ad.AdDate, ad.Genre))
         {
             throw new ConflictException("Ad already exists");
         }
@@ -99,17 +99,17 @@ public class AdService : IAdService
 
     public async Task<IEnumerable<Ad>> GetAds(string userId)
     {
-        return await _adsCollection.Find(x => x.Id == userId).ToListAsync();
+        return await _adsCollection.Find(x => x.UserId == userId).ToListAsync();
     }
 
     public async Task<Ad> GetAd(string userId, string adId)
     {
-        return await _adsCollection.Find(x => x.Id == userId && x.Id == adId).FirstOrDefaultAsync();
+        return await _adsCollection.Find(x => x.UserId == userId && x.Id == adId).FirstOrDefaultAsync();
     }
 
     public async Task<Ad> GetAdBySessionId(string userId, string sessionId)
     {
-        return await _adsCollection.Find(x => x.Id == userId && x.SessionId == sessionId).FirstOrDefaultAsync();
+        return await _adsCollection.Find(x => x.UserId == userId && x.SessionId == sessionId).FirstOrDefaultAsync();
     }
 
     public async Task<Ad> UpdateAd(Ad ad)
@@ -122,11 +122,11 @@ public class AdService : IAdService
         return null;
     }
 
-    public async Task<bool> ConfirmPaymentAd(string sessionId, string user)
+    public async Task<bool> ConfirmPaymentAd(string sessionId, string userId)
     {
         var filter = Builders<Ad>.Filter.And(
             Builders<Ad>.Filter.Eq("SessionId", sessionId),
-            Builders<Ad>.Filter.Eq("User", user)
+            Builders<Ad>.Filter.Eq(x => x.UserId, userId)
         );
         var update = Builders<Ad>.Update.Set("Paid", true);
 

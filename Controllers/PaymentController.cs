@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
-using Stripe.Checkout;
 using Stripe;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookBoostApi.Controllers;
 
@@ -31,13 +31,14 @@ public class PaymentController : ControllerBase
     }
 
     [HttpPost("CreateAdCheckoutSession")]
+    [Authorize]
     public async Task<IActionResult> CreateAdCheckoutSession([FromBody] AdUpload ad)
     {
-        var requestHost = $"{HttpContext.Request.Headers["Origin"].FirstOrDefault()}";
+        var requestHost = HttpContext.GetRequestHost();
         try
         {
             var sessionId = _paymentService.CreateAdCheckoutSession(ad, requestHost);
-            await _adService.CreateAd(ad, sessionId, "jmjordan");
+            await _adService.CreateAd(ad, sessionId, HttpContext.GetUserId());
             return Ok(new { sessionId });
         }
         catch (StripeException e)
@@ -61,23 +62,26 @@ public class PaymentController : ControllerBase
     }
 
     [HttpGet("VerifySession/{sessionId}")]
+    [Authorize]
     public async Task<IActionResult> VerifySession(string sessionId)
     {
+        var userId = HttpContext.GetUserId();
         var result = _paymentService.VerifySession(sessionId);
         if(result)
         {
-            var confirmed = await _adService.ConfirmPaymentAd(sessionId, "jmjordan");
+            var confirmed = await _adService.ConfirmPaymentAd(sessionId, userId);
             if(confirmed)
             {
-                await _emailService.SendAdCreated("jmstjordan");
+                await _emailService.SendAdCreated(userId);
             }
-            var ad = await _adService.GetAdBySessionId("jmjordan", sessionId);
+            var ad = await _adService.GetAdBySessionId(userId, sessionId);
             return Ok(ad);
         }
         return NoContent();
     }
 
     [HttpGet("Prices")]
+    [Authorize]
     public IActionResult GetPrices()
     {
         return Ok(_priceService.GetPrices());
