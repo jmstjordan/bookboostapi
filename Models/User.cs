@@ -8,14 +8,15 @@ public class User
 {
     [BsonId]
     [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
-    // [JsonIgnore]
+    [JsonIgnore]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
-    public string Username { get; set; }
+    public string? Username { get; set; }
 
     public required string Email { get; set; }
-
-    public required string PasswordHash { get; set;}
+    
+    [JsonIgnore]
+    public string? PasswordHash { get; set;}
 
     public Role[] Roles { get; set; } = [Role.Reader];
 

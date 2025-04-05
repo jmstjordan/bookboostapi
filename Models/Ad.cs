@@ -28,12 +28,12 @@ public class Ad
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    [JsonIgnore]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     public required DateOnly AdDate { get; set; }
 
-    public required string User { get; set; }
+    [BsonRepresentation(BsonType.ObjectId)]
+    public required string UserId { get; set; }
 
     public required Product Product { get; set; }
 

@@ -1,6 +1,8 @@
+using System.ComponentModel;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace BookBoostApi.Services;
@@ -26,9 +28,14 @@ public class UserService : IUserService
         await _usersCollection.InsertOneAsync(user);
     }
 
-    public async Task<User> GetUser(string username)
+    public Task<Preferences> GetPreferences(string userId, Preferences preferences)
     {
-        return await _usersCollection.Find(x => x.Username == username).FirstOrDefaultAsync();
+        throw new NotImplementedException();
+    }
+
+    public async Task<User> GetUser(string userId)
+    {
+        return await _usersCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
     }
 
     public async Task<User> GetUserbyEmail(string email)
@@ -36,9 +43,14 @@ public class UserService : IUserService
         return await _usersCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
     }
 
-    // public async Task UpsertUser(User user)
-    // {
-    //     var filter = Builders<User>.Filter.Eq(x => x.UserId, user.UserId);
-    //     await _usersCollection.ReplaceOneAsync(filter, user, new ReplaceOptions { IsUpsert = true });
-    // }
+    public async Task<bool> UpdatePreferences(string userId, Preferences preferences)
+    {
+        var update = Builders<User>.Update.Set("Preferences", preferences);
+
+        var result = await _usersCollection.UpdateOneAsync(
+            Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
+            update
+        );
+        return result.ModifiedCount > 0;
+    }
 }

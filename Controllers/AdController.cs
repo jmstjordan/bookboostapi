@@ -51,14 +51,14 @@ public class AdController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetAds()
     {
-        return Ok(await _adService.GetAds("jmjordan"));
+        return Ok(await _adService.GetAds(HttpContext.GetUserId()));
     }
 
     [HttpGet("{id}")]
     [Authorize]
     public async Task<IActionResult> GetAd(string id)
     {
-        var result = await _adService.GetAd("jmjordan", id);
+        var result = await _adService.GetAd(HttpContext.GetUserId(), id);
         if(result == null)
         {
             return NotFound("Ad not found");
@@ -70,7 +70,7 @@ public class AdController : ControllerBase
     [Authorize]
     public async Task<IActionResult> DeleteAd(string id)
     {
-        var count = await _adService.DeleteAd("jmjordan", id);
+        var count = await _adService.DeleteAd(HttpContext.GetUserId(), id);
         return count == 1 ? Ok() : NotFound();
     }
 
@@ -78,7 +78,7 @@ public class AdController : ControllerBase
     [Authorize]
     public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
-        var existingAd = await _adService.GetAd("jmjordan", id);
+        var existingAd = await _adService.GetAd(HttpContext.GetUserId(), id);
         if(existingAd == null)
         {
             return NotFound("Ad not found");

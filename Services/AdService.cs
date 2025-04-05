@@ -31,7 +31,7 @@ public class AdService : IAdService
             bookBoostDatabaseSettings.Value.AdsCollectionName);
     }
 
-    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string user)
+    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId)
     {
         var product = await _productService.GetProduct(ad.ProductUpload);
         if(AdExistsByUser("jmjordan", product.ProductId, ad.AdDate, ad.Genre))
@@ -47,7 +47,7 @@ public class AdService : IAdService
             Genre = ad.Genre,
             Product = product,
             AdDate = ad.AdDate,
-            User = user,
+            UserId = userId,
             State = AdState.Pending,
             SessionId = sessionId,
             Paid = false,
@@ -83,10 +83,10 @@ public class AdService : IAdService
         throw new Exception("Unable to find Ad Date");
     }
 
-    private bool AdExistsByUser(string user, string productId, DateOnly adDate, Genre genre)
+    private bool AdExistsByUser(string userId, string productId, DateOnly adDate, Genre genre)
     {
         return _adsCollection.CountDocuments(x => x.Product.ProductId == productId 
-            && x.User == user 
+            && x.UserId == userId 
             && x.Genre == genre
             && x.AdDate == adDate
         ) > 0;
@@ -97,27 +97,27 @@ public class AdService : IAdService
         return (Genre[])Enum.GetValues(typeof(Genre));
     }
 
-    public async Task<IEnumerable<Ad>> GetAds(string user)
+    public async Task<IEnumerable<Ad>> GetAds(string userId)
     {
-        return await _adsCollection.Find(x => x.User == user).ToListAsync();
+        return await _adsCollection.Find(x => x.Id == userId).ToListAsync();
     }
 
-    public async Task<Ad> GetAd(string user, string adId)
+    public async Task<Ad> GetAd(string userId, string adId)
     {
-        return await _adsCollection.Find(x => x.User == user && x.Id == adId).FirstOrDefaultAsync();
+        return await _adsCollection.Find(x => x.Id == userId && x.Id == adId).FirstOrDefaultAsync();
     }
 
-    public async Task<Ad> GetAdBySessionId(string user, string sessionId)
+    public async Task<Ad> GetAdBySessionId(string userId, string sessionId)
     {
-        return await _adsCollection.Find(x => x.User == user && x.SessionId == sessionId).FirstOrDefaultAsync();
+        return await _adsCollection.Find(x => x.Id == userId && x.SessionId == sessionId).FirstOrDefaultAsync();
     }
 
     public async Task<Ad> UpdateAd(Ad ad)
     {
-        var result = await _adsCollection.ReplaceOneAsync(x => x.Id == ad.Id && x.User == ad.User, ad);
+        var result = await _adsCollection.ReplaceOneAsync(x => x.Id == ad.Id, ad);
         if(result.MatchedCount == 1)
         {
-            return await GetAd(ad.User, ad.Id.ToString());
+            return await GetAd(ad.Id, ad.Id.ToString());
         }
         return null;
     }
@@ -134,9 +134,9 @@ public class AdService : IAdService
         return result.ModifiedCount == 1;
     }
 
-    public async Task<long> DeleteAd(string user, string id)
+    public async Task<long> DeleteAd(string userId, string id)
     {
-        var result = await _adsCollection.DeleteOneAsync(x => x.Id == id && x.User == user);
+        var result = await _adsCollection.DeleteOneAsync(x => x.Id == id && x.UserId == userId);
         return result.DeletedCount;
     }
 

@@ -6,10 +6,12 @@ namespace BookBoostApi.Interfaces;
 public interface IUserService
 {
 
-    public Task<User> GetUser(string username);
+    public Task<User> GetUser(string userId);
 
     public Task CreatUser(User user);
     
     public Task<User> GetUserbyEmail(string email);
+
+    public Task<bool> UpdatePreferences(string userId, Preferences preferences);
 }
 

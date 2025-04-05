@@ -3,10 +3,9 @@ using BookBoostApi.Models;
 
 public static class Utility
 {
-    public static string GetRole(this HttpContext context)
+    public static string GetUserId(this HttpContext context)
     {
-        var url = context.Request.Headers["Origin"].FirstOrDefault();
-        return url;
+        return context.User.Claims.FirstOrDefault(c => c.Type == CustomClaimTypes.UserId)?.Value;
     }
 
     public static string GetUsername(this string email)
