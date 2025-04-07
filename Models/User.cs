@@ -7,7 +7,7 @@ namespace BookBoostApi.Models;
 public class User
 {
     [BsonId]
-    [BsonRepresentation(MongoDB.Bson.BsonType.ObjectId)]
+    [BsonRepresentation(BsonType.ObjectId)]
     [JsonIgnore]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
@@ -18,10 +18,13 @@ public class User
     [JsonIgnore]
     public string? PasswordHash { get; set;}
 
-    public Role[] Roles { get; set; } = [Role.Reader];
-
     public Preferences? Preferences { get; set; }
 
+    [BsonRepresentation(BsonType.String)]
+    public Role Role { get; set; }
+
+    [JsonIgnore]
+    public bool IsAdmin { get; set; }
 }
 
 public class Preferences

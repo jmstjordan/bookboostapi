@@ -31,7 +31,8 @@ public class AuthController : ControllerBase
         var user = new User
         {
             Email = request.Email,
-            PasswordHash = hashedPassword
+            PasswordHash = hashedPassword,
+            Role = request.Role
         };
         await _userService.CreatUser(user);
         var newAccessToken = _authService.GenerateAccessToken(user);
@@ -53,6 +54,11 @@ public class AuthController : ControllerBase
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return Unauthorized("Invalid username or password.");
+        }
+        if(request.Role != user.Role)
+        {
+            user.Role = request.Role;
+            await _userService.UpdateRole(user.Id, request.Role);
         }
 
         var newAccessToken = _authService.GenerateAccessToken(user);

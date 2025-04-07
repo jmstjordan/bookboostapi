@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using System.Security.Claims;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -88,6 +89,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
             // Set the key used to validate the JWT
             IssuerSigningKey = new SymmetricSecurityKey(key),
+            
+            RoleClaimType = ClaimTypes.Role 
         };
 
         options.SaveToken = true; // Save the JWT token in the HTTP context

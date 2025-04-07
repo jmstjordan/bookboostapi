@@ -1,4 +1,3 @@
-using System.ComponentModel;
 using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Options;
@@ -28,11 +27,6 @@ public class UserService : IUserService
         await _usersCollection.InsertOneAsync(user);
     }
 
-    public Task<Preferences> GetPreferences(string userId, Preferences preferences)
-    {
-        throw new NotImplementedException();
-    }
-
     public async Task<User> GetUser(string userId)
     {
         return await _usersCollection.Find(x => x.Id == userId).FirstOrDefaultAsync();
@@ -52,5 +46,15 @@ public class UserService : IUserService
             update
         );
         return result.ModifiedCount > 0;
+    }
+
+    public async Task UpdateRole(string userId, Role role)
+    {
+        var update = Builders<User>.Update.Set("Role", role);
+
+        await _usersCollection.UpdateOneAsync(
+            Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
+            update
+        );
     }
 }
