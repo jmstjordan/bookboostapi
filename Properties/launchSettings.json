@@ -14,9 +14,18 @@
       "dotnetRunMessages": true,
       "launchBrowser": true,
       "launchUrl": "swagger",
-      "applicationUrl": "http://localhost:5151",
+      "applicationUrl": "https://localhost:7042",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "BookBoostDatabase__ConnectionString": "mongodb+srv://bookboost:h13yGuEEFKdZGCw6@cluster0.agdrg.mongodb.net/",
+        "RainforestSettings__ApiKey": "9154143694D647E48B838B7E0933E946",
+        "OpenAiSettings__ApiKey": "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",
+        "NotificationSettings__AwsKey": "AKIA2UZAVQGW6IOA5H4G",
+        "NotificationSettings__AwsSecret": "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",
+        "NotificationSettings__AwsRegion": "us-west-2",
+        "NotificationSettings__AwsSenderEmail": "no-reply@loan-notify.com",
+        "APPLICATIONINSIGHTS_CONNECTION_STRING": "InstrumentationKey=699abcc5-e4bf-4c3e-a1d5-04f282aa92cb;IngestionEndpoint=https://centralus-2.in.applicationinsights.azure.com/;LiveEndpoint=https://centralus.livediagnostics.monitor.azure.com/;ApplicationId=382a5c23-baea-481e-ac68-a7fbcd5e6e8f",
+        "PaymentSettings__StripeApiKey": "sk_test_mvmU9s1OfCaJyRM5n32JncRk"
       }
     },
     "https": {
