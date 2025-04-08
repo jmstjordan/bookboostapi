@@ -39,8 +39,10 @@ public class Ad
 
     public required DateOnly Created { get; set; }
     
+    [BsonRepresentation(BsonType.String)]
     public required AdState State { get; set; } 
 
+    [BsonRepresentation(BsonType.String)]
     public required Genre Genre { get; set; }
 
     public required string SessionId { get; set; }

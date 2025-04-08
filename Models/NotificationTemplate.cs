@@ -14,6 +14,7 @@ public class NotificationTemplate
 
     public required string Subject { get; set; }
 
+    [BsonRepresentation(MongoDB.Bson.BsonType.String)]
     public required TemplateType Type { get; set; }
 
 }

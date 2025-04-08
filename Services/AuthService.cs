@@ -46,7 +46,7 @@ public class AuthService : IAuthService
             issuer: _issuer,
             audience: _issuer,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(1),
+            expires: DateTime.UtcNow.AddMinutes(15),
             signingCredentials: creds
         );
 

@@ -32,7 +32,8 @@ public class AuthController : ControllerBase
         {
             Email = request.Email,
             PasswordHash = hashedPassword,
-            Role = request.Role
+            Role = request.Role,
+            Username = request.Email.GetUsername()
         };
         await _userService.CreatUser(user);
         var newAccessToken = _authService.GenerateAccessToken(user);

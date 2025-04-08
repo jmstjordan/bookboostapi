@@ -25,7 +25,7 @@ public class ProductService : IProductService
     public async Task<Product> GetProduct(ProductUpload product)
     {
         string key = product.GetCacheKey();
-        if (!_memoryCache.TryGetValue(product.GetCacheKey(), out Product cacheValue))
+        if (!_memoryCache.TryGetValue(key, out Product cacheValue))
         {
             _logger.LogInformation($"Cache Miss: {key}");
             switch(product.ProductSource)
@@ -50,13 +50,13 @@ public class ProductService : IProductService
     public async Task<IEnumerable<Product>> GetProducts(ProductSearch productSearch)
     {
         string key = productSearch.GetCacheKey();
-        if (!_memoryCache.TryGetValue(productSearch, out List<Product> cacheValue))
+        if (!_memoryCache.TryGetValue(key, out List<Product> cacheValue))
         {
             _logger.LogInformation($"Cache Miss: {key}");
             var results = await _amazonProductService.GetProducts(productSearch);
 
             // TODO: add search params
-            _memoryCache.Set(productSearch, results,  new MemoryCacheEntryOptions()
+            _memoryCache.Set(key, results,  new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromDays(1)));
             return results;
         }

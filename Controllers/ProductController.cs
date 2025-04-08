@@ -18,7 +18,6 @@ public class ProductController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
     public async Task<IEnumerable<Product>> GetProducts([FromQuery] ProductSearch productSearch)
     {
         return await _productService.GetProducts(productSearch);

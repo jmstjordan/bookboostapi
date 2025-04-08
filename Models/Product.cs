@@ -47,7 +47,8 @@ public class ProductUpload
 
 public class ProductSearch
 {
-    public required string CategoryId { get; set; }
+    // amazon kindle
+    public required string CategoryId { get; set; } = "133140011";
 
     // TODO: change this to ENUM
     public string? SortBy { get; set; }
