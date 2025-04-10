@@ -21,9 +21,9 @@ public class NotificationTemplate
 
 public enum TemplateType
 {
-    AdCreated = 0,
-    AdAccepted = 1,
-    AdDeclined = 2,
-    PromotionJoined = 3,
-    UserCreated = 4
+    AdCreated,
+    AdAccepted,
+    AdDeclined,
+    PromotionJoined,
+    UserCreated
 }

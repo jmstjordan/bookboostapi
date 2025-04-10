@@ -12,11 +12,14 @@ public class AuthController : ControllerBase
 
     IRefreshTokenService _refreshTokenService;
 
-    public AuthController(IUserService userService, IAuthService authService, IRefreshTokenService refreshTokenService)
+    IAppEmailService _emailService;
+
+    public AuthController(IUserService userService, IAuthService authService, IRefreshTokenService refreshTokenService, IAppEmailService emailService)
     {
         _userService = userService;
         _authService = authService;
         _refreshTokenService = refreshTokenService;
+        _emailService = emailService;
     }
 
     [HttpPost("Signup")]
@@ -36,6 +39,7 @@ public class AuthController : ControllerBase
             Username = request.Email.GetUsername()
         };
         await _userService.CreatUser(user);
+        await _emailService.SendUserCreated(user);
         var newAccessToken = _authService.GenerateAccessToken(user);
         var newRefreshToken = await _authService.GenerateRefreshToken(user);
 
