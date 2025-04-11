@@ -49,7 +49,7 @@ builder.Services.AddSingleton<IAdService, AdService>();
 builder.Services.AddSingleton<IPriceService, PriceService>();
 builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
-builder.Services.AddSingleton<IRefreshTokenService, RefreshTokenService>();
+builder.Services.AddSingleton<ITokenService, TokenService>();
 
 // var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>

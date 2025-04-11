@@ -10,15 +10,15 @@ public class AuthController : ControllerBase
 
     IAuthService _authService;
 
-    IRefreshTokenService _refreshTokenService;
+    ITokenService _tokenService;
 
     IAppEmailService _emailService;
 
-    public AuthController(IUserService userService, IAuthService authService, IRefreshTokenService refreshTokenService, IAppEmailService emailService)
+    public AuthController(IUserService userService, IAuthService authService, ITokenService tokenService, IAppEmailService emailService)
     {
         _userService = userService;
         _authService = authService;
-        _refreshTokenService = refreshTokenService;
+        _tokenService = tokenService;
         _emailService = emailService;
     }
 
@@ -41,12 +41,12 @@ public class AuthController : ControllerBase
         await _userService.CreatUser(user);
         await _emailService.SendUserCreated(user);
         var newAccessToken = _authService.GenerateAccessToken(user);
-        var newRefreshToken = await _authService.GenerateRefreshToken(user);
+        var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168); // 7 days
 
         return Ok(new
         {
             access_token = newAccessToken,
-            refresh_token = newRefreshToken.Token
+        refresh_token = newRefreshToken.Token
         });
     }
 
@@ -58,7 +58,7 @@ public class AuthController : ControllerBase
 
         if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
-            return Unauthorized("Invalid username or password.");
+            return Unauthorized("Invalid Credentials");
         }
         if(request.Role != user.Role)
         {
@@ -67,7 +67,7 @@ public class AuthController : ControllerBase
         }
 
         var newAccessToken = _authService.GenerateAccessToken(user);
-        var newRefreshToken = await _authService.GenerateRefreshToken(user);
+        var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168);
 
         return Ok(new
         {
@@ -77,9 +77,9 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshRequest request)
+    public async Task<IActionResult> Refresh([FromBody] TokenRequest request)
     {
-        var storedToken = await _refreshTokenService.GetToken(request);
+        var storedToken = await _tokenService.GetToken(request.Token);
         if (storedToken == null || storedToken.IsExpired)
         {
             return Unauthorized("Invalid or expired refresh token");
@@ -89,15 +89,54 @@ public class AuthController : ControllerBase
         {
             return Unauthorized("User not found");
         }
-        await _refreshTokenService.RevokeToken(storedToken);
+        await _tokenService.RevokeToken(storedToken);
 
         var newAccessToken = _authService.GenerateAccessToken(user);
-        var newRefreshToken = await _authService.GenerateRefreshToken(user);
+        var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168); // 7 days
 
         return Ok(new
         {
             access_token = newAccessToken,
             refresh_token = newRefreshToken.Token
         });
+    }
+
+    [HttpPost("ForgotPassword")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var user = await _userService.GetUserbyEmail(request.Email);
+        if (user == null)
+        {
+            return BadRequest("Invalid request");
+            // don't reveal if a user exists
+        }
+
+        var newPasswordToken = await _authService.GenerateToken(user, TokenType.PasswordReset, 1);
+        
+        var requestHost = HttpContext.GetRequestHost();
+        var resetUrl = $"{requestHost}/reset-password?token={Uri.EscapeDataString(newPasswordToken.Token)}&email={Uri.EscapeDataString(user.Email)}";
+        await _emailService.SendPasswordReset(user, resetUrl);
+        return Ok();
+    }
+
+    [HttpPost("ResetPassword")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var user = await _userService.GetUserbyEmail(request.Email);
+        if (user == null)
+        {
+            return BadRequest("Invalid request");
+            // same thing, dont return 404 here
+        }
+        var passwordToken = await _tokenService.GetToken(request.Token);
+        if (passwordToken == null || passwordToken.IsExpired)
+        {
+            return BadRequest("Invalid request");
+            // purposefully ambigiuous here
+        }
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
+        await _tokenService.RevokeToken(passwordToken);
+        await _userService.UpdatePassword(user.Id, hashedPassword);
+        return Ok();
     }
 }

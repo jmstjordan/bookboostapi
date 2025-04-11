@@ -14,5 +14,5 @@ public class BookBoostDatabaseSettings
 
     public string TemplatesCollectionName { get; set; } = null!;
 
-    public string RefreshTokensCollectionName { get; set; } = null!;
+    public string TokensCollectionName { get; set; } = null!;
 }

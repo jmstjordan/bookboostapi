@@ -63,4 +63,9 @@ public class AppEmailService : IAppEmailService
         var user = await _userService.GetUser(userId);
         return await RenderAndSend(TemplateType.PromotionJoined, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
     }
+
+    public async Task<bool> SendPasswordReset(User user, string resetUrl)
+    {
+        return await RenderAndSend(TemplateType.PasswordReset, new { Firstname = "Bill", Lastname = "Gates", ResetUrl = resetUrl }, user.Email);
+    }
 }

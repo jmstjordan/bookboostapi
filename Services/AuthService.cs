@@ -15,14 +15,14 @@ public class AuthService : IAuthService
 
     private readonly string _issuer;
 
-    IRefreshTokenService _refreshTokenService;
+    ITokenService _tokenService;
 
 
-    public AuthService(IOptions<AuthSettings> authSettings, IRefreshTokenService refreshTokenService)
+    public AuthService(IOptions<AuthSettings> authSettings, ITokenService tokenService)
     {
         _secretKey = authSettings.Value.SecretKey;
         _issuer = authSettings.Value.Audience;
-        _refreshTokenService = refreshTokenService;
+        _tokenService = tokenService;
     }
 
     public string GenerateAccessToken(User user)
@@ -53,15 +53,16 @@ public class AuthService : IAuthService
         return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
-    public async Task<RefreshToken> GenerateRefreshToken(User user)
+    public async Task<TokenStore> GenerateToken(User user, TokenType tokenType, int expirationHours)
     {
-        var refreshToken = new RefreshToken
+        var token = new TokenStore
         {
             Token = Convert.ToBase64String(RandomNumberGenerator.GetBytes(64)),
-            Expires = DateTime.UtcNow.AddDays(7),
-            UserId = user.Id
+            Expires = DateTime.UtcNow.AddHours(expirationHours),
+            UserId = user.Id,
+            TokenType = tokenType
         };
-        await _refreshTokenService.AddToken(refreshToken);
-        return refreshToken;
+        await _tokenService.AddToken(token);
+        return token;
     }
 }

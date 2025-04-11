@@ -37,6 +37,16 @@ public class UserService : IUserService
         return await _usersCollection.Find(x => x.Email == email).FirstOrDefaultAsync();
     }
 
+    public async Task UpdatePassword(string userId, string passwordHash)
+    {
+        var update = Builders<User>.Update.Set("PasswordHash", passwordHash);
+
+        await _usersCollection.UpdateOneAsync(
+            Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
+            update
+        );
+    }
+    
     public async Task<bool> UpdatePreferences(string userId, Preferences preferences)
     {
         var update = Builders<User>.Update.Set("Preferences", preferences);
