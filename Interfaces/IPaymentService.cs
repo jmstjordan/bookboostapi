@@ -5,8 +5,10 @@ namespace BookBoostApi.Interfaces;
 
 public interface IPaymentService
 {
-    public string CreateAdCheckoutSession(AdUpload ad, string requestHost);
+    public Task<string> CreateAdCheckoutSession(AdUpload ad, string requestHost, string userId, int price);
 
-    public bool VerifySession(string sessionId);
+    public Task<string> VerifySession(string sessionId);
+
+    public Task<bool> ChargeAd(Ad ad);
 }
 

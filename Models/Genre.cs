@@ -1,11 +1,25 @@
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace BookBoostApi.Models;
 
 public enum Genre
 {
-    Romance = 1,
-    Fantasy = 2,
-    MysteryThriller = 3,
-    ScienceFiction = 4,
-    YoungAdult = 5,
-    NonFiction = 6
+    [BsonRepresentation(BsonType.String)]
+    Romance,
+
+    [BsonRepresentation(BsonType.String)]
+    Fantasy,
+    
+    [BsonRepresentation(BsonType.String)]
+    MysteryThriller,
+
+    [BsonRepresentation(BsonType.String)]
+    ScienceFiction,
+
+    [BsonRepresentation(BsonType.String)]
+    YoungAdult,
+
+    [BsonRepresentation(BsonType.String)]
+    NonFiction
 }

@@ -30,6 +30,8 @@ public class Ad
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
+    public required string OrderId { get; set; }
+
     public required DateOnly AdDate { get; set; }
 
     [BsonRepresentation(BsonType.ObjectId)]
@@ -38,6 +40,8 @@ public class Ad
     public required Product Product { get; set; }
 
     public required DateOnly Created { get; set; }
+
+    public DateOnly? RunDate { get; set; }
     
     [BsonRepresentation(BsonType.String)]
     public required AdState State { get; set; } 
@@ -47,7 +51,12 @@ public class Ad
 
     public required string SessionId { get; set; }
 
-    public required bool Paid { get; set; }
+    // in cents, the amount the ad will be charged for
+    public required int Price { get; set; }
+
+    public string? PaymentMethodId { get; set; }
+
+    public string? PaymentIntentId { get; set; }
 }
 
 public enum AdState
@@ -56,7 +65,6 @@ public enum AdState
     Declined = 2,
     Accepted = 3
 }
-
 
 public class AdAvailability
 {

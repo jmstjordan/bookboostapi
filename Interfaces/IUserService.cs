@@ -17,5 +17,7 @@ public interface IUserService
     public Task UpdateRole(string userId, Role role);
 
     public Task UpdatePassword(string userId, string passwordHash);
+
+    public Task UpdateUserField(string userId, string key, dynamic field);
 }
 

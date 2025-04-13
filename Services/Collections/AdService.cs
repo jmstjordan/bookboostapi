@@ -13,7 +13,7 @@ public class AdService : IAdService
     private readonly IMongoCollection<Ad> _adsCollection;
     private IProductService _productService;
     private const int LENGTH_OF_AD_CALENDER = 90;
-    private const int MAX_AD_PER_DAY = 10;
+    private const int MAX_AD_PER_DAY = 5;
 
     public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IProductService productService)
     {
@@ -31,7 +31,7 @@ public class AdService : IAdService
             bookBoostDatabaseSettings.Value.AdsCollectionName);
     }
 
-    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId)
+    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId, int price)
     {
         var product = await _productService.GetProduct(ad.ProductUpload);
         if(AdExistsByUser(userId, product.ProductId, ad.AdDate, ad.Genre))
@@ -50,8 +50,9 @@ public class AdService : IAdService
             UserId = userId,
             State = AdState.Pending,
             SessionId = sessionId,
-            Paid = false,
-            Created = DateOnly.FromDateTime(DateTime.Now)
+            Created = DateOnly.FromDateTime(DateTime.Now),
+            OrderId = Guid.NewGuid().GenerateShortGuid(),
+            Price = price
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 
@@ -128,7 +129,7 @@ public class AdService : IAdService
             Builders<Ad>.Filter.Eq("SessionId", sessionId),
             Builders<Ad>.Filter.Eq(x => x.UserId, userId)
         );
-        var update = Builders<Ad>.Update.Set("Paid", true);
+        var update = Builders<Ad>.Update.Set("PaymentScheduled", true);
 
         var result = await _adsCollection.UpdateOneAsync(filter, update);
         return result.ModifiedCount == 1;
@@ -224,7 +225,7 @@ public class AdService : IAdService
         {
             foreach (var category in result["counts"].AsBsonArray)
             {
-                if(category["category"].AsInt32 == (int) genre)
+                if(category["category"].AsString == genre.ToString())
                 {
                     adDates.Add(new AdAvailability { AdDate = result["date"].AsString, Count = category["count"].AsInt32} );
                 }
@@ -242,5 +243,15 @@ public class AdService : IAdService
             };
         }).ToList();
         return res;
+    }
+
+    public async Task UpdateField(string adId, string key, dynamic field)
+    {
+        var update = Builders<Ad>.Update.Set(key, field);
+
+        await _adsCollection.UpdateOneAsync(
+            Builders<Ad>.Filter.Eq("_id", ObjectId.Parse(adId)),
+            update
+        );
     }
 }

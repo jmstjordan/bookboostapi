@@ -25,6 +25,8 @@ public class User
 
     [JsonIgnore]
     public bool IsAdmin { get; set; }
+
+    public string? CustomerId { get; set; }
 }
 
 public class Preferences

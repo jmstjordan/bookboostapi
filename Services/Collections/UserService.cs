@@ -46,7 +46,7 @@ public class UserService : IUserService
             update
         );
     }
-    
+
     public async Task<bool> UpdatePreferences(string userId, Preferences preferences)
     {
         var update = Builders<User>.Update.Set("Preferences", preferences);
@@ -61,6 +61,16 @@ public class UserService : IUserService
     public async Task UpdateRole(string userId, Role role)
     {
         var update = Builders<User>.Update.Set("Role", role);
+
+        await _usersCollection.UpdateOneAsync(
+            Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
+            update
+        );
+    }
+
+    public async Task UpdateUserField(string userId, string key, dynamic field)
+    {
+        var update = Builders<User>.Update.Set(key, field);
 
         await _usersCollection.UpdateOneAsync(
             Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),

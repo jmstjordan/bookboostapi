@@ -20,7 +20,6 @@ public class PaymentController : ControllerBase
 
     private IPaymentService _paymentService;
 
-
     public PaymentController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService, IPriceService priceService, IPaymentService paymentService)
     {
         _logger = logger;
@@ -37,8 +36,12 @@ public class PaymentController : ControllerBase
         var requestHost = HttpContext.GetRequestHost();
         try
         {
-            var sessionId = _paymentService.CreateAdCheckoutSession(ad, requestHost);
-            await _adService.CreateAd(ad, sessionId, HttpContext.GetUserId());
+            var prices = _priceService.GetPrices();
+            var adPrice = prices[ad.Genre];
+
+            var userId = HttpContext.GetUserId();
+            var sessionId = await _paymentService.CreateAdCheckoutSession(ad, requestHost, userId, adPrice);
+            var newAd = await _adService.CreateAd(ad, sessionId, userId, adPrice);
             return Ok(new { sessionId });
         }
         catch (StripeException e)
@@ -65,19 +68,24 @@ public class PaymentController : ControllerBase
     [Authorize]
     public async Task<IActionResult> VerifySession(string sessionId)
     {
-        var userId = HttpContext.GetUserId();
-        var result = _paymentService.VerifySession(sessionId);
-        if(result)
+        var paymentMethodId = await _paymentService.VerifySession(sessionId);
+        if(paymentMethodId == null)
         {
-            var confirmed = await _adService.ConfirmPaymentAd(sessionId, userId);
-            if(confirmed)
-            {
-                await _emailService.SendAdCreated(userId);
-            }
-            var ad = await _adService.GetAdBySessionId(userId, sessionId);
-            return Ok(ad);
+        return StatusCode(500, "Unable to retrieve PaymentId from Session");
         }
-        return NoContent();
+        var userId = HttpContext.GetUserId();
+        var ad = await _adService.GetAdBySessionId(userId, sessionId);
+        await _adService.UpdateField(ad.Id, "PaymentMethodId", paymentMethodId);
+        await _emailService.SendAdCreated(userId);
+
+        return Ok(ad);
+    }
+
+    [HttpGet("Charge/{adId}")]
+    public async Task<IActionResult> ChargeCustomer(string adId)
+    {
+        var ad = await _adService.GetAd("67fc20a6d6739b28b63899ce", adId);
+        return Ok(await _paymentService.ChargeAd(ad));
     }
 
     [HttpGet("Prices")]
