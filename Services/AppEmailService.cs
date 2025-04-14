@@ -53,6 +53,12 @@ public class AppEmailService : IAppEmailService
         return await RenderAndSend(TemplateType.AdDeclined, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
     }
 
+    public async Task<bool> SendAdCanceled(string userId)
+    {
+        var user = await _userService.GetUser(userId);
+        return await RenderAndSend(TemplateType.AdCanceled, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
+    }
+
     public async Task<bool> SendUserCreated(User user)
     {
         return await RenderAndSend(TemplateType.UserCreated, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);

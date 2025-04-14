@@ -13,7 +13,6 @@ public class AdController : ControllerBase
 
     private IAdService _adService;
 
-
     private IAppEmailService _emailService;
 
     public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService)
@@ -22,30 +21,6 @@ public class AdController : ControllerBase
         _adService = adService;
         _emailService = emailService;
     }
- 
-    // [HttpPost]
-    // public async Task<IActionResult> CreateAd([FromBody] AdUpload ad)
-    // {
-    //     try
-    //     {
-    //         var createdAd = await _adService.CreateAd(ad, "jmjordan");
-    //         await _emailService.SendAdCreated("jmstjordan");
-    //         return Created(createdAd.Id.ToString(), createdAd);
-    //     }
-    //     catch(NotImplementedException e)
-    //     {
-    //         return BadRequest(e.Message);
-    //     }
-    //     catch(ConflictException e)
-    //     {
-    //         return BadRequest(e.Message);
-    //     }
-    //     catch(Exception e)
-    //     {
-    //         _logger.LogError(e.StackTrace);
-    //         return StatusCode(500);
-    //     }
-    // }
 
     [HttpGet]
     [Authorize]
@@ -54,50 +29,26 @@ public class AdController : ControllerBase
         return Ok(await _adService.GetAds(HttpContext.GetUserId()));
     }
 
-    [HttpGet("{id}")]
-    [Authorize]
-    public async Task<IActionResult> GetAd(string id)
-    {
-        var result = await _adService.GetAd(HttpContext.GetUserId(), id);
-        if(result == null)
-        {
-            return NotFound("Ad not found");
-        }
-        return Ok(result);
-    }
-    
-    [HttpDelete("{id}")]
-    [Authorize]
-    public async Task<IActionResult> DeleteAd(string id)
-    {
-        var count = await _adService.DeleteAd(HttpContext.GetUserId(), id);
-        return count == 1 ? Ok() : NotFound();
-    }
-
     [HttpPatch("{id}")]
-    [Authorize]
+    [Authorize(Roles = "admin")]
     public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
-        var userId = HttpContext.GetUserId();
-        var existingAd = await _adService.GetAd(userId, id);
-        if(existingAd == null)
+        // only supports state change for now
+        await _adService.UpdateField(id, "State", ad.State);
+        var currentAd = await _adService.GetAd(id);
+        if(currentAd.State == AdState.Accepted)
         {
-            return NotFound("Ad not found");
+            await _emailService.SendAdAccepted(currentAd.UserId);
         }
-        if(true){
-            // if we are an admin
-            if(ad.State == AdState.Accepted)
-            {
-                await _emailService.SendAdAccepted(userId);
-            }
-            else if(ad.State == AdState.Declined)
-            {
-                await _emailService.SendAdDeclined(userId);
-            }
-            existingAd.State = ad.State;
+        else if(currentAd.State == AdState.Declined)
+        {
+            await _emailService.SendAdDeclined(currentAd.UserId);
+        }        
+        else if(currentAd.State == AdState.Canceled)
+        {
+            await _emailService.SendAdDeclined(currentAd.UserId);
         }
-        var result = await _adService.UpdateAd(existingAd);
-        return result != null ? Ok(result) : BadRequest();
+        return Ok(currentAd.State);
     }
 
     [HttpGet("Availability/{genre}")]

@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
@@ -20,8 +19,8 @@ public class AdPatch
 
 public enum Tier
 {
-    Basic = 1,
-    Ambassador = 2
+    Basic,
+    Ambassador
 }
 
 public class Ad
@@ -61,9 +60,10 @@ public class Ad
 
 public enum AdState
 {
-    Pending = 1,
-    Declined = 2,
-    Accepted = 3
+    Pending,
+    Declined,
+    Accepted,
+    Canceled
 }
 
 public class AdAvailability

@@ -10,6 +10,8 @@ public interface IAppEmailService
 
     public Task<bool> SendAdDeclined(string userId);
 
+    public Task<bool> SendAdCanceled(string userId);
+
     public Task<bool> SendUserCreated(User user);
 
     public Task<bool> SendPromotionJoined(string userId);

@@ -103,24 +103,14 @@ public class AdService : IAdService
         return await _adsCollection.Find(x => x.UserId == userId).ToListAsync();
     }
 
-    public async Task<Ad> GetAd(string userId, string adId)
+    public async Task<Ad> GetAd(string adId)
     {
-        return await _adsCollection.Find(x => x.UserId == userId && x.Id == adId).FirstOrDefaultAsync();
+        return await _adsCollection.Find(x => x.Id == adId).FirstOrDefaultAsync();
     }
 
     public async Task<Ad> GetAdBySessionId(string userId, string sessionId)
     {
         return await _adsCollection.Find(x => x.UserId == userId && x.SessionId == sessionId).FirstOrDefaultAsync();
-    }
-
-    public async Task<Ad> UpdateAd(Ad ad)
-    {
-        var result = await _adsCollection.ReplaceOneAsync(x => x.Id == ad.Id, ad);
-        if(result.MatchedCount == 1)
-        {
-            return await GetAd(ad.Id, ad.Id.ToString());
-        }
-        return null;
     }
 
     public async Task<bool> ConfirmPaymentAd(string sessionId, string userId)
@@ -133,12 +123,6 @@ public class AdService : IAdService
 
         var result = await _adsCollection.UpdateOneAsync(filter, update);
         return result.ModifiedCount == 1;
-    }
-
-    public async Task<long> DeleteAd(string userId, string id)
-    {
-        var result = await _adsCollection.DeleteOneAsync(x => x.Id == id && x.UserId == userId);
-        return result.DeletedCount;
     }
 
     public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre)

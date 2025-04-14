@@ -81,12 +81,13 @@ public class PaymentController : ControllerBase
         return Ok(ad);
     }
 
-    [HttpGet("Charge/{adId}")]
-    public async Task<IActionResult> ChargeCustomer(string adId)
-    {
-        var ad = await _adService.GetAd("67fc20a6d6739b28b63899ce", adId);
-        return Ok(await _paymentService.ChargeAd(ad));
-    }
+    // [HttpGet("Charge/{adId}")]
+    // [Authorize]
+    // public async Task<IActionResult> ChargeCustomer(string adId)
+    // {
+    //     var ad = await _adService.GetAd(adId);
+    //     return Ok(await _paymentService.ChargeAd(ad));
+    // }
 
     [HttpGet("Prices")]
     [Authorize]

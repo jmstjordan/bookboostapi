@@ -35,7 +35,8 @@ public class AuthService : IAuthService
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.Role, user.Role.ToString().ToLower())
         };
-        if(user.IsAdmin){
+        if(user.IsAdmin)
+        {
             claims.Add(new Claim(ClaimTypes.Role, "admin"));
         }
 

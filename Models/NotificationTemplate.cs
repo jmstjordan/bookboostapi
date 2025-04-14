@@ -24,6 +24,7 @@ public enum TemplateType
     AdCreated,
     AdAccepted,
     AdDeclined,
+    AdCanceled,
     PromotionJoined,
     UserCreated,
     PasswordReset

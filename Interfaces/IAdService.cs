@@ -8,11 +8,7 @@ public interface IAdService
 
     public Task<IEnumerable<Ad>> GetAds(string userId);
 
-    public Task<Ad> GetAd(string userId, string adId);
-
-    public Task<Ad> UpdateAd(Ad ad);
-
-    public Task<long> DeleteAd(string userId, string id);
+    public Task<Ad> GetAd(string adId);
 
     public Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre);
 
