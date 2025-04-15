@@ -51,14 +51,19 @@ builder.Services.AddSingleton<IUserService, UserService>();
 builder.Services.AddSingleton<IAuthService, AuthService>();
 builder.Services.AddSingleton<ITokenService, TokenService>();
 
-// var  MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddDefaultPolicy(policy =>
     {
-        builder.SetIsOriginAllowed(origin => new Uri(origin).Host == "localhost")
-            .AllowAnyHeader()
-            .AllowAnyMethod();
+        policy.SetIsOriginAllowed(origin =>
+        {
+            var uri = new Uri(origin);
+            // Allow your Azure frontend and all localhost ports
+            // "https://your-frontend.azurestaticapps.net"
+            return uri.Host == "localhost" || origin == builder.Configuration["AzureHosting:FrontendUrl"];
+        })
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
