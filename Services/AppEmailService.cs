@@ -35,33 +35,33 @@ public class AppEmailService : IAppEmailService
         return await _emailService.EmailAsync(email, templateDoc.Subject, body);
     }
 
-    public async Task<bool> SendAdCreated(string userId)
+    public async Task<bool> SendAdCreated(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdCreated, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
+        return await RenderAndSend(TemplateType.AdCreated, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
     }
 
-    public async Task<bool> SendAdAccepted(string userId)
+    public async Task<bool> SendAdAccepted(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdAccepted, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
+        return await RenderAndSend(TemplateType.AdAccepted, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
     }
 
-    public async Task<bool> SendAdDeclined(string userId)
+    public async Task<bool> SendAdDeclined(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdDeclined, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
+        return await RenderAndSend(TemplateType.AdDeclined, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
     }
 
-    public async Task<bool> SendAdCanceled(string userId)
+    public async Task<bool> SendAdCanceled(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdCanceled, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
+        return await RenderAndSend(TemplateType.AdCanceled, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
     }
 
     public async Task<bool> SendUserCreated(User user)
     {
-        return await RenderAndSend(TemplateType.UserCreated, new { Firstname = "Bill", Lastname = "Gates" }, user.Email);
+        return await RenderAndSend(TemplateType.UserCreated, new { Username = user.Username, Email = user.Email }, user.Email);
     }
 
     public async Task<bool> SendPromotionJoined(string userId)

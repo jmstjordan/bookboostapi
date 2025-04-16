@@ -49,15 +49,15 @@ public class AdController : ControllerBase
         if(currentAd.State == AdState.Accepted)
         {
             await _paymentService.ChargeAd(currentAd);
-            await _emailService.SendAdAccepted(currentAd.UserId);
+            await _emailService.SendAdAccepted(currentAd.UserId, currentAd);
         }
         else if(currentAd.State == AdState.Declined)
         {
-            await _emailService.SendAdDeclined(currentAd.UserId);
+            await _emailService.SendAdDeclined(currentAd.UserId, currentAd);
         }        
         else if(currentAd.State == AdState.Canceled)
         {
-            await _emailService.SendAdDeclined(currentAd.UserId);
+            await _emailService.SendAdDeclined(currentAd.UserId, currentAd);
         }
         return Ok(currentAd.State);
     }

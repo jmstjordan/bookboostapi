@@ -76,7 +76,7 @@ public class PaymentController : ControllerBase
         var userId = HttpContext.GetUserId();
         var ad = await _adService.GetAdBySessionId(userId, sessionId);
         await _adService.UpdateField(ad.Id, "PaymentMethodId", paymentMethodId);
-        await _emailService.SendAdCreated(userId);
+        await _emailService.SendAdCreated(userId, ad);
 
         return Ok(ad);
     }
