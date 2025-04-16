@@ -17,7 +17,7 @@ public class ProductController : ControllerBase
     }
 
     [HttpPost("Load")]
-    // [Authorize(Roles = "admin")]
+    [Authorize(Roles = "admin")]
     public async Task<IActionResult> LoadProducts([FromBody] ProductSearch productSearch)
     {
         await _productService.LoadProducts(productSearch);
