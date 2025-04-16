@@ -15,11 +15,14 @@ public class AdController : ControllerBase
 
     private IAppEmailService _emailService;
 
-    public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService)
+    private IPaymentService _paymentService;
+
+    public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService, IPaymentService paymentService)
     {
         _logger = logger;
         _adService = adService;
         _emailService = emailService;
+        _paymentService = paymentService;
     }
 
     [HttpGet]
@@ -34,10 +37,18 @@ public class AdController : ControllerBase
     public async Task<ActionResult> UpdateAd(string id, [FromBody] AdPatch ad)
     {
         // only supports state change for now
-        await _adService.UpdateField(id, "State", ad.State);
         var currentAd = await _adService.GetAd(id);
         if(currentAd.State == AdState.Accepted)
         {
+            return BadRequest("This ad is already accepted");
+        }
+        await _adService.UpdateField(id, "State", ad.State);
+
+        // retrieving ad one more time for safety and I'm too lazy to update my update function
+        currentAd = await _adService.GetAd(id);
+        if(currentAd.State == AdState.Accepted)
+        {
+            await _paymentService.ChargeAd(currentAd);
             await _emailService.SendAdAccepted(currentAd.UserId);
         }
         else if(currentAd.State == AdState.Declined)
