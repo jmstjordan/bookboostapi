@@ -1,3 +1,7 @@
+using System.Text.Json.Serialization;
+using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace BookBoostApi.Models;
 
 public enum ProductSource
@@ -7,12 +11,21 @@ public enum ProductSource
 
 public class Product
 {
+    [BsonId]
+    [BsonRepresentation(BsonType.ObjectId)]
+    [JsonIgnore]
+    public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
+
+    [JsonIgnore]
+    public DateOnly LoadTime { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+
     public required string ProductId { get; set; }   
 
     public required ProductSource ProductSource { get; set; }
 
     public required string Title { get; set; }
 
+    [JsonIgnore]
     public string? Description { get; set; }
 
     public string? DescriptionView { get; set; }

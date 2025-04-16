@@ -11,16 +11,23 @@ public class ProductController : ControllerBase
 {
     private IProductService _productService;
 
-
     public ProductController(IProductService productService)
     {
         _productService = productService;
     }
 
-    [HttpGet]
-    public async Task<IEnumerable<Product>> GetProducts([FromQuery] ProductSearch productSearch)
+    [HttpPost("Load")]
+    // [Authorize(Roles = "admin")]
+    public async Task<IActionResult> LoadProducts([FromBody] ProductSearch productSearch)
     {
-        return await _productService.GetProducts(productSearch);
+        await _productService.LoadProducts(productSearch);
+        return NoContent();
+    }
+
+    [HttpGet]
+    public async Task<IEnumerable<Product>> GetProducts()
+    {
+        return await _productService.GetProducts();
     }
 
     [HttpPost]
