@@ -6,3 +6,10 @@ public class LoginRequest
     public string Password { get; set; }
     public Role Role { get; set; }
 }
+
+public class GoogleLoginRequest
+{
+    public string IdToken { get; set; }
+
+    public Role Role { get; set; }
+}

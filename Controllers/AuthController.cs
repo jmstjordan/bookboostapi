@@ -1,6 +1,7 @@
 using BookBoostApi.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
+using Google.Apis.Auth;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -46,7 +47,7 @@ public class AuthController : ControllerBase
         return Ok(new
         {
             access_token = newAccessToken,
-        refresh_token = newRefreshToken.Token
+            refresh_token = newRefreshToken.Token
         });
     }
 
@@ -68,6 +69,45 @@ public class AuthController : ControllerBase
 
         var newAccessToken = _authService.GenerateAccessToken(user);
         var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168);
+
+        return Ok(new
+        {
+            access_token = newAccessToken,
+            refresh_token = newRefreshToken.Token
+        });
+    }
+
+    [HttpPost("Login/Google")]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+    {
+        var payload = await GoogleJsonWebSignature.ValidateAsync(request.IdToken);
+
+        if (payload == null || !payload.EmailVerified)
+        {
+            return Unauthorized("Invalid Google token");
+        }
+
+        // Check if user exists, or create one
+        var user = await _userService.GetUserbyEmail(payload.Email);
+        if (user == null)
+        {
+            user = new User
+            {
+                Email = payload.Email,
+                Role = request.Role,
+                Username = payload.Name,
+                Name = payload.GivenName
+            };
+            await _userService.CreatUser(user);
+            await _emailService.SendUserCreated(user);
+        }
+        else if (user.Name == null)
+        {
+            await _userService.UpdateUserField(user.Id, "Name", payload.Name);
+        }
+
+        var newAccessToken = _authService.GenerateAccessToken(user);
+        var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168); // 7 days
 
         return Ok(new
         {
