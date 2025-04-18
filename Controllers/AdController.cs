@@ -62,6 +62,25 @@ public class AdController : ControllerBase
         return Ok(currentAd.State);
     }
 
+    [HttpPost("{id}/Cancel")]
+    [Authorize]
+    public async Task<ActionResult> CancelAd(string id)
+    {
+        var userId = HttpContext.GetUserId();
+        var ad = await _adService.GetAd(id);
+        if(ad == null || ad.UserId != userId)
+        {
+            return NotFound();
+        }
+        if(ad.State == AdState.Canceled)
+        {
+            return BadRequest("This ad is already canceled");
+        }
+        await _adService.UpdateField(ad.Id, "State", AdState.Canceled);
+        await _emailService.SendAdCanceled(userId, ad);
+        return NoContent();
+    }
+
     [HttpGet("Availability/{genre}")]
     [Authorize]
     public async Task<ActionResult> GetAvailableDates(Genre genre)
