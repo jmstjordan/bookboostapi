@@ -28,7 +28,7 @@ public class AuthController : ControllerBase
     {
         if (await _userService.GetUserbyEmail(request.Email) != null)
         {
-            return BadRequest("User with this Email already exists.");
+            return Conflict("Account already exists");
         }
 
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
