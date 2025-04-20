@@ -17,7 +17,7 @@ public class Product
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     [JsonIgnore]
-    public DateOnly LoadTime { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public DateTime Created { get; set; } = DateTime.Now;
 
     public required string ProductId { get; set; }   
 

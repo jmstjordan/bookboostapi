@@ -50,7 +50,6 @@ public class AdService : IAdService
             UserId = userId,
             State = AdState.Pending,
             SessionId = sessionId,
-            Created = DateOnly.FromDateTime(DateTime.Now),
             OrderId = Guid.NewGuid().GenerateShortGuid(),
             Price = price,
             ProductPrice = productPrice

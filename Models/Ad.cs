@@ -40,9 +40,9 @@ public class Ad
 
     public required Product Product { get; set; }
 
-    public required DateOnly Created { get; set; }
+    public DateTime Created { get; set; } = DateTime.Now;
 
-    public DateOnly? RunDate { get; set; }
+    public DateTime? RunDate { get; set; }
     
     [BsonRepresentation(BsonType.String)]
     public required AdState State { get; set; } 
