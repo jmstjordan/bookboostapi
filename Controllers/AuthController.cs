@@ -15,12 +15,15 @@ public class AuthController : ControllerBase
 
     IAppEmailService _emailService;
 
-    public AuthController(IUserService userService, IAuthService authService, ITokenService tokenService, IAppEmailService emailService)
+    ISubscriberService _subscriberService;
+
+    public AuthController(IUserService userService, IAuthService authService, ITokenService tokenService, IAppEmailService emailService, ISubscriberService subscriberService)
     {
         _userService = userService;
         _authService = authService;
         _tokenService = tokenService;
         _emailService = emailService;
+        _subscriberService = subscriberService;
     }
 
     [HttpPost("Signup")]
@@ -41,6 +44,7 @@ public class AuthController : ControllerBase
         };
         await _userService.CreatUser(user);
         await _emailService.SendUserCreated(user);
+        await _subscriberService.AddSubscriber(new Subscriber { Email = request.Email, SubscriberSource = SubscriberSource.BookTokClub });
         var newAccessToken = _authService.GenerateAccessToken(user);
         var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168); // 7 days
 
@@ -99,6 +103,7 @@ public class AuthController : ControllerBase
                 Name = payload.GivenName
             };
             await _userService.CreatUser(user);
+            await _subscriberService.AddSubscriber(new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub });
             await _emailService.SendUserCreated(user);
         }
         else if (user.Name == null)
