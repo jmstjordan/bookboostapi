@@ -5,7 +5,7 @@ namespace BookBoostApi.Services;
 
 public class PriceService : IPriceService
 {
-    public Dictionary<Genre, int> GetPrices()
+    public Dictionary<Genre, int> GetAdPrices()
     {
         var prices = new Dictionary<Genre, int>
         {
@@ -17,5 +17,10 @@ public class PriceService : IPriceService
             {Genre.NonFiction, 5100}
         };
         return prices;
+    }
+
+    public IEnumerable<int> GetProductPrices()
+    {
+        return [99, 199, 299, 399];
     }
 }

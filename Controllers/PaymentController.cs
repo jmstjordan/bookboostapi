@@ -36,12 +36,18 @@ public class PaymentController : ControllerBase
         var requestHost = HttpContext.GetRequestHost();
         try
         {
-            var prices = _priceService.GetPrices();
+            var prices = _priceService.GetAdPrices();
             var adPrice = prices[ad.Genre];
+
+            var productPrices = _priceService.GetProductPrices();
+            if(!productPrices.Contains(ad.ProductPrice))
+            {
+                return BadRequest("Product price not listed");
+            }
 
             var userId = HttpContext.GetUserId();
             var sessionId = await _paymentService.CreateAdCheckoutSession(ad, requestHost, userId, adPrice);
-            var newAd = await _adService.CreateAd(ad, sessionId, userId, adPrice);
+            var newAd = await _adService.CreateAd(ad, sessionId, userId, adPrice, ad.ProductPrice);
             return Ok(new { sessionId });
         }
         catch (StripeException e)
@@ -88,11 +94,4 @@ public class PaymentController : ControllerBase
     //     var ad = await _adService.GetAd(adId);
     //     return Ok(await _paymentService.ChargeAd(ad));
     // }
-
-    [HttpGet("Prices")]
-    [Authorize]
-    public IActionResult GetPrices()
-    {
-        return Ok(_priceService.GetPrices());
-    }
 }

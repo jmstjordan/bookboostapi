@@ -17,12 +17,15 @@ public class AdController : ControllerBase
 
     private IPaymentService _paymentService;
 
-    public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService, IPaymentService paymentService)
+    private IPriceService _priceService;
+
+    public AdController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService, IPaymentService paymentService, IPriceService priceService)
     {
         _logger = logger;
         _adService = adService;
         _emailService = emailService;
         _paymentService = paymentService;
+        _priceService = priceService;
     }
 
     [HttpGet]
@@ -93,5 +96,12 @@ public class AdController : ControllerBase
     public ActionResult GetGenres()
     {
         return Ok(_adService.GetGenres());
+    }
+
+    [HttpGet("Prices")]
+    [Authorize]
+    public IActionResult GetAdPrices()
+    {
+        return Ok(_priceService.GetAdPrices());
     }
 }

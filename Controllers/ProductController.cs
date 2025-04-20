@@ -11,9 +11,12 @@ public class ProductController : ControllerBase
 {
     private IProductService _productService;
 
-    public ProductController(IProductService productService)
+    private IPriceService _priceService;
+
+    public ProductController(IProductService productService, IPriceService priceService)
     {
         _productService = productService;
+        _priceService = priceService;
     }
 
     [HttpPost("Load")]
@@ -43,5 +46,12 @@ public class ProductController : ControllerBase
     public ActionResult GetProductSources()
     {
         return Ok(_productService.GetProductSources());
+    }
+
+    [HttpGet("Prices")]
+    [Authorize]
+    public IActionResult GetAdPrices()
+    {
+        return Ok(_priceService.GetProductPrices());
     }
 }

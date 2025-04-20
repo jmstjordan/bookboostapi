@@ -10,6 +10,8 @@ public class AdUpload
     public required ProductUpload ProductUpload { get; set; } 
 
     public required Genre Genre { get; set; }
+
+    public required int ProductPrice { get; set; }
 }
 
 public class AdPatch
@@ -53,6 +55,9 @@ public class Ad
     // in cents, the amount the ad will be charged for
     public required int Price { get; set; }
 
+    // the list price from the author
+    public required int ProductPrice { get; set; }
+
     public string? PaymentMethodId { get; set; }
 
     public string? PaymentIntentId { get; set; }
@@ -71,6 +76,4 @@ public class AdAvailability
     public required string AdDate { get; set; }
 
     public required int Count { get; set; }
-
-    // public Dictionary<Genre, double>? Price { get; set; }
 }

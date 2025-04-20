@@ -31,7 +31,7 @@ public class AdService : IAdService
             bookBoostDatabaseSettings.Value.AdsCollectionName);
     }
 
-    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId, int price)
+    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId, int price, int productPrice)
     {
         var product = await _productService.GetProduct(ad.ProductUpload);
         if(AdExistsByUser(userId, product.ProductId, ad.AdDate, ad.Genre))
@@ -52,7 +52,8 @@ public class AdService : IAdService
             SessionId = sessionId,
             Created = DateOnly.FromDateTime(DateTime.Now),
             OrderId = Guid.NewGuid().GenerateShortGuid(),
-            Price = price
+            Price = price,
+            ProductPrice = productPrice
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 

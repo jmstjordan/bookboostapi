@@ -6,7 +6,7 @@ namespace BookBoostApi.Models;
 
 public enum ProductSource
 {
-    Amazon = 1
+    Amazon
 }
 
 public class Product
@@ -50,6 +50,7 @@ public class ProductUpload
 {
     public required string ProductId { get; set; }
 
+    [BsonRepresentation(BsonType.String)]
     public required ProductSource ProductSource { get; set; }
 
     public string GetCacheKey()
