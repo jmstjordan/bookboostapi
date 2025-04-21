@@ -13,7 +13,7 @@ public class User
 
     public string? Username { get; set; }
 
-    public string Name { get; set; }
+    public string? Name { get; set; }
 
     public required string Email { get; set; }
     
@@ -29,6 +29,8 @@ public class User
     public bool IsAdmin { get; set; }
 
     public string? CustomerId { get; set; }
+
+    public DateTime Created { get; set; } = DateTime.Now;
 }
 
 public class Preferences

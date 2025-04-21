@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace BookBoostApi.Controllers;
 
@@ -17,6 +18,10 @@ public class DistributionController : ControllerBase
     [HttpPost("Subscriber")]
     public async Task<IActionResult> AddSubscriber([FromBody] SubscriberUpload subscriberUpload)
     {
+        if(!new EmailAddressAttribute().IsValid(subscriberUpload.Email))
+        {
+            return BadRequest("Invalid Email");
+        }
         var subscriber = new Subscriber
         {
             Email = subscriberUpload.Email,
