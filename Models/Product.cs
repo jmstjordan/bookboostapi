@@ -21,6 +21,7 @@ public class Product
 
     public required string ProductId { get; set; }   
 
+    [BsonRepresentation(BsonType.String)]
     public required ProductSource ProductSource { get; set; }
 
     public required string Title { get; set; }
