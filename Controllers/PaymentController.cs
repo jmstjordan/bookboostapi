@@ -20,13 +20,16 @@ public class PaymentController : ControllerBase
 
     private IPaymentService _paymentService;
 
-    public PaymentController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService, IPriceService priceService, IPaymentService paymentService)
+    private IProductService _productService;
+
+    public PaymentController(ILogger<AdController> logger, IAdService adService, IAppEmailService emailService, IPriceService priceService, IPaymentService paymentService, IProductService productService)
     {
         _logger = logger;
         _adService = adService;
         _emailService = emailService;
         _priceService = priceService;
         _paymentService = paymentService;
+        _productService = productService;
     }
 
     [HttpPost("CreateAdCheckoutSession")]
@@ -40,14 +43,19 @@ public class PaymentController : ControllerBase
             var adPrice = prices[ad.Genre];
 
             var productPrices = _priceService.GetProductPrices();
-            if(!productPrices.Contains(ad.ProductPrice))
+            if(!productPrices.Contains(ad.ProductUpload.OfferPrice))
             {
-                return BadRequest("Product price not listed");
+                return BadRequest("Offer price not listed");
             }
 
             var userId = HttpContext.GetUserId();
             var sessionId = await _paymentService.CreateAdCheckoutSession(ad, requestHost, userId, adPrice);
-            var newAd = await _adService.CreateAd(ad, sessionId, userId, adPrice, ad.ProductPrice);
+            var product = await _productService.CreateProduct(ad.ProductUpload, userId);
+            if(product == null)
+            {
+                return BadRequest("Product unable to be created. ProductId likely not found");
+            }
+            var newAd = await _adService.CreateAd(ad, sessionId, userId, adPrice, product);
             return Ok(new { sessionId });
         }
         catch (StripeException e)

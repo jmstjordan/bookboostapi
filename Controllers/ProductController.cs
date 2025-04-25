@@ -37,8 +37,16 @@ public class ProductController : ControllerBase
     [Authorize]
     public async Task<IActionResult> GetProduct([FromBody] ProductUpload productUpload)
     {
-        var result = await _productService.GetProduct(productUpload);
+        var result = await _productService.GetProductFromSource(productUpload);
         return result != null ? Ok(result) : NotFound();
+    }
+
+    [HttpGet("Me")]
+    [Authorize]
+    public async Task<IActionResult> GetProductsByUser()
+    {
+        var userId = HttpContext.GetUserId();
+        return Ok(await _productService.GetProductsByUser(userId));
     }
 
     [HttpGet("Sources")]
@@ -50,7 +58,7 @@ public class ProductController : ControllerBase
 
     [HttpGet("Prices")]
     [Authorize]
-    public IActionResult GetAdPrices()
+    public IActionResult GetProductPrices()
     {
         return Ok(_priceService.GetProductPrices());
     }

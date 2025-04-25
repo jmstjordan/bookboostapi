@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
@@ -19,21 +20,30 @@ public class Product
     [JsonIgnore]
     public DateTime Created { get; set; } = DateTime.Now;
 
-    public required string ProductId { get; set; }   
+    public required string ProductId { get; set; }
+
+    [BsonRepresentation(BsonType.ObjectId)]
+    public string? UserId { get; set; }
 
     [BsonRepresentation(BsonType.String)]
     public required ProductSource ProductSource { get; set; }
 
     public required string Title { get; set; }
 
+    public string? TitleView { get; set; }
+
     [JsonIgnore]
     public string? Description { get; set; }
+
+    public string? DescriptionTrim { get; set; }
 
     public string? DescriptionView { get; set; }
 
     public string? Link { get; set; }
 
     public Price? Price { get; set; }
+
+    public int OfferPrice { get; set; }
 
     public double Rating { get; set; }
 
@@ -53,6 +63,14 @@ public class ProductUpload
 
     [BsonRepresentation(BsonType.String)]
     public required ProductSource ProductSource { get; set; }
+
+    [MaxLength(200)]
+    public string? TitleView { get; set; }
+
+    [MaxLength(1000)]
+    public string? DescriptionView { get; set; }
+
+    public int OfferPrice { get; set; }
 
     public string GetCacheKey()
     {

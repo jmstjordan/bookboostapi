@@ -33,7 +33,7 @@ public class ProductService : IProductService
         // // and any other products, apple, google, barns and noble, etc.
     }
 
-    public async Task<Product> GetProduct(ProductUpload product)
+    public async Task<Product> GetProductFromSource(ProductUpload product)
     {
         string key = product.GetCacheKey();
         if (!_memoryCache.TryGetValue(key, out Product cacheValue))
@@ -43,9 +43,13 @@ public class ProductService : IProductService
             {
                 case ProductSource.Amazon:
                     var amazonProduct = await _amazonProductService.GetProduct(product.ProductId);
+                    if(amazonProduct == null)
+                    {
+                        return null;
+                    }
                     if(amazonProduct.Description != null)
                     {
-                        amazonProduct.DescriptionView = await _aiService.TrimDescription(amazonProduct.Description, 250);
+                        amazonProduct.DescriptionTrim = await _aiService.TrimDescription(amazonProduct.Description, 250);
                     }
                     _memoryCache.Set(key, amazonProduct, new MemoryCacheEntryOptions()
                         .SetSlidingExpiration(TimeSpan.FromDays(1)));
@@ -83,8 +87,40 @@ public class ProductService : IProductService
     public async Task LoadProducts(ProductSearch productSearch)
     {
         var results = await _amazonProductService.GetProducts(productSearch);
-        // TODO: Come back around to this when we know what we want to do with showing products
-        await _productsCollection.DeleteManyAsync(FilterDefinition<Product>.Empty);
         await _productsCollection.InsertManyAsync(results);
+    }
+
+    public async Task<Product> CreateProduct(ProductUpload product, string? userId = null)
+    {
+        var newProduct = await GetProductFromSource(product);
+        if(newProduct == null)
+        {
+            return null;
+        }
+        newProduct.OfferPrice = product.OfferPrice;
+        if(product.DescriptionView != null)
+        {
+            newProduct.DescriptionView = product.DescriptionView;
+        }
+        if(product.TitleView != null)
+        {
+            newProduct.TitleView = product.TitleView;
+        }
+        if(userId != null)
+        {
+            newProduct.UserId = userId;
+        }
+        await _productsCollection.InsertOneAsync(newProduct);
+        return newProduct;
+    }
+
+    public async Task<Product> GetProduct(string id)
+    {
+        return await _productsCollection.Find(x => x.Id == id).FirstOrDefaultAsync();
+    }
+
+    public async Task<IEnumerable<Product>> GetProductsByUser(string userId)
+    {
+        return await _productsCollection.Find(x => x.UserId == userId).ToListAsync();
     }
 }

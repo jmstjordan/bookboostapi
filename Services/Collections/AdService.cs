@@ -31,10 +31,9 @@ public class AdService : IAdService
             bookBoostDatabaseSettings.Value.AdsCollectionName);
     }
 
-    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId, int price, int productPrice)
+    public async Task<Ad> CreateAd(AdUpload ad, string sessionId, string userId, int price, Product product)
     {
-        var product = await _productService.GetProduct(ad.ProductUpload);
-        if(AdExistsByUser(userId, product.ProductId, ad.AdDate, ad.Genre))
+        if(AdExistsByUser(userId, product, ad.AdDate, ad.Genre))
         {
             throw new ConflictException("Ad already exists");
         }
@@ -45,14 +44,13 @@ public class AdService : IAdService
         var newAd = new Ad 
         {
             Genre = ad.Genre,
-            Product = product,
+            ProductId = product.Id,
             AdDate = ad.AdDate,
             UserId = userId,
             State = AdState.Pending,
             SessionId = sessionId,
             OrderId = Guid.NewGuid().GenerateShortGuid(),
             Price = price,
-            ProductPrice = productPrice
         };
         await _adsCollection.InsertOneAsync(newAd);
         return newAd; 
@@ -84,9 +82,9 @@ public class AdService : IAdService
         throw new Exception("Unable to find Ad Date");
     }
 
-    private bool AdExistsByUser(string userId, string productId, DateOnly adDate, Genre genre)
+    private bool AdExistsByUser(string userId, Product product, DateOnly adDate, Genre genre)
     {
-        return _adsCollection.CountDocuments(x => x.Product.ProductId == productId 
+        return _adsCollection.CountDocuments(x => x.ProductId == product.Id 
             && x.UserId == userId 
             && x.Genre == genre
             && x.AdDate == adDate

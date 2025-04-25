@@ -10,13 +10,15 @@ public class AppEmailService : IAppEmailService
     private IEmailService _emailService;
     private ITemplateService _templateService;
     private IUserService _userService;
+    private IProductService _productService;
     private IMongoCollection<NotificationTemplate> _templatesCollection;
 
-    public AppEmailService(IEmailService emailService, ITemplateService templateService, IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IUserService userService)
+    public AppEmailService(IEmailService emailService, ITemplateService templateService, IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IUserService userService, IProductService productService)
     {
         _emailService = emailService;
         _templateService = templateService;
         _userService = userService;
+        _productService = productService;
 
         var mongoClient = new MongoClient(
             bookBoostDatabaseSettings.Value.ConnectionString);
@@ -38,25 +40,29 @@ public class AppEmailService : IAppEmailService
     public async Task<bool> SendAdCreated(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdCreated, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
+        var product = await _productService.GetProduct(ad.ProductId);
+        return await RenderAndSend(TemplateType.AdCreated, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendAdAccepted(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdAccepted, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
+        var product = await _productService.GetProduct(ad.ProductId);
+        return await RenderAndSend(TemplateType.AdAccepted, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendAdDeclined(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdDeclined, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
+        var product = await _productService.GetProduct(ad.ProductId);
+        return await RenderAndSend(TemplateType.AdDeclined, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendAdCanceled(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
-        return await RenderAndSend(TemplateType.AdCanceled, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = ad.Product.ProductId, Title = ad.Product.Title, Date = ad.AdDate, Price = ad.Price, Image = ad.Product.Image }, user.Email);
+        var product = await _productService.GetProduct(ad.ProductId);
+        return await RenderAndSend(TemplateType.AdCanceled, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendUserCreated(User user)

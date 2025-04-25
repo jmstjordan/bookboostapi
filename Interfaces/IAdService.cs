@@ -4,7 +4,7 @@ namespace BookBoostApi.Interfaces;
 
 public interface IAdService
 {
-    public Task<Ad> CreateAd(AdUpload ad, string sessionId, string user, int price, int productPrice);
+    public Task<Ad> CreateAd(AdUpload ad, string sessionId, string user, int price, Product product);
 
     public Task<IEnumerable<Ad>> GetAds(string userId);
 

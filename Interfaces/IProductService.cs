@@ -9,9 +9,15 @@ public interface IProductService
 
     public Task LoadProducts(ProductSearch productSearch);
 
-    public Task<Product> GetProduct(ProductUpload product);
+    public Task<Product> GetProductFromSource(ProductUpload product);
+
+    public Task<Product> GetProduct(string id);
+
+    public Task<IEnumerable<Product>> GetProductsByUser(string userId);
 
     public IEnumerable<ProductSource> GetProductSources();
+
+    public Task<Product> CreateProduct(ProductUpload product, string? userId = null);
 
 }
 

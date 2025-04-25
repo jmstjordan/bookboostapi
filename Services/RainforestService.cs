@@ -18,10 +18,13 @@ public class RainforestService : IAmazonProductService
 
     private string _apiKey;
 
+    private ILogger<RainforestService> _logger;
 
-    public RainforestService(IOptions<RainforestSettings> settings)
+
+    public RainforestService(IOptions<RainforestSettings> settings, ILogger<RainforestService> logger)
     {
         _apiKey = settings.Value.ApiKey;
+        _logger = logger;
     }
 
     public async Task<Product> GetProduct(string asin)
@@ -35,7 +38,21 @@ public class RainforestService : IAmazonProductService
             .AddParameter("type", "product");
 
         // TODO: Consider cancelation token from client here as a param
-        var response = await client.GetAsync<RainforestProductResponse>(request);
+        // TODO: Test when product id is not found
+        RainforestProductResponse? response;
+        try
+        {
+            response = await client.GetAsync<RainforestProductResponse>(request);
+            if (response == null || response.Product == null)
+            {
+                return null;
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            _logger.LogError($"Error getting product from Rainforest API for ASIN: {asin} {e.StatusCode} {e.StackTrace}");
+            return null;
+        }
 
         var variant = response.Product.Variants.Find(x => x.Id == asin);
         var product = new Product
@@ -66,7 +83,6 @@ public class RainforestService : IAmazonProductService
             .AddParameter("type", "search")
             .AddParameter("sort_by", productSearch.SortBy ?? DEFAULT_SORT_BY)
             .AddParameter("search_term", productSearch.SearchTerm ?? DEFAULT_SEARCH_TERM);
-
 
         // TODO: Consider cancelation token from client here as a param
         RainforestSearchResponse? response;

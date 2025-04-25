@@ -10,8 +10,6 @@ public class AdUpload
     public required ProductUpload ProductUpload { get; set; } 
 
     public required Genre Genre { get; set; }
-
-    public required int ProductPrice { get; set; }
 }
 
 public class AdPatch
@@ -38,7 +36,8 @@ public class Ad
     [BsonRepresentation(BsonType.ObjectId)]
     public required string UserId { get; set; }
 
-    public required Product Product { get; set; }
+    [BsonRepresentation(BsonType.ObjectId)]
+    public required string ProductId { get; set; }
 
     public DateTime Created { get; set; } = DateTime.Now;
 
@@ -54,9 +53,6 @@ public class Ad
 
     // in cents, the amount the ad will be charged for
     public required int Price { get; set; }
-
-    // the list price from the author
-    public required int ProductPrice { get; set; }
 
     public string? PaymentMethodId { get; set; }
 
