@@ -15,6 +15,8 @@ public class User
 
     public string? Name { get; set; }
 
+    public string? ProfilePicture { get; set; }
+
     public required string Email { get; set; }
     
     [JsonIgnore]

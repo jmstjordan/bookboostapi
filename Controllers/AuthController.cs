@@ -99,8 +99,9 @@ public class AuthController : ControllerBase
             {
                 Email = payload.Email,
                 Role = request.Role,
-                Username = payload.Name,
-                Name = payload.GivenName
+                Username = payload.Email.GetUsername(),
+                Name = payload.Name,
+                ProfilePicture = payload.Picture
             };
             await _userService.CreatUser(user);
             await _subscriberService.AddSubscriber(new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub });
