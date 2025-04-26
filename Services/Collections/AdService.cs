@@ -49,7 +49,6 @@ public class AdService : IAdService
             UserId = userId,
             State = AdState.Pending,
             SessionId = sessionId,
-            OrderId = Guid.NewGuid().GenerateShortGuid(),
             Price = price,
         };
         await _adsCollection.InsertOneAsync(newAd);

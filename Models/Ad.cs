@@ -29,7 +29,7 @@ public class Ad
     [BsonRepresentation(BsonType.ObjectId)]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
-    public required string OrderId { get; set; }
+    public string OrderId { get; set; } = DateTime.UtcNow.Ticks.ToString().Substring(6);
 
     public required DateOnly AdDate { get; set; }
 

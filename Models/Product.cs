@@ -14,7 +14,6 @@ public class Product
 {
     [BsonId]
     [BsonRepresentation(BsonType.ObjectId)]
-    [JsonIgnore]
     public string Id { get; set; } = ObjectId.GenerateNewId().ToString();
 
     [JsonIgnore]
