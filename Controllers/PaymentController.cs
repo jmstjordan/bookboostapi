@@ -3,6 +3,7 @@ using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
 using Stripe;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
 
 namespace BookBoostApi.Controllers;
 
@@ -37,6 +38,15 @@ public class PaymentController : ControllerBase
     public async Task<IActionResult> CreateAdCheckoutSession([FromBody] AdUpload ad)
     {
         var requestHost = HttpContext.GetRequestHost();
+        var activity = Activity.Current;
+        if(activity != null)
+        {
+            activity.SetTag("RequestHost", requestHost);
+            activity.SetTag("AdDate", ad.AdDate.ToString());
+            activity.SetTag("Genre", ad.Genre.ToString());
+            activity.SetTag("OfferPrice", ad.ProductUpload.OfferPrice);
+        }
+        
         try
         {
             var prices = _priceService.GetAdPrices();
@@ -90,7 +100,7 @@ public class PaymentController : ControllerBase
         var paymentMethodId = await _paymentService.VerifySession(sessionId);
         if(paymentMethodId == null)
         {
-        return StatusCode(500, "Unable to retrieve PaymentId from Session");
+            return StatusCode(500, "Unable to retrieve PaymentId from Session");
         }
         var userId = HttpContext.GetUserId();
         var ad = await _adService.GetAdBySessionId(userId, sessionId);

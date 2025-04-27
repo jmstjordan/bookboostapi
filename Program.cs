@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using System.Security.Claims;
+using Microsoft.ApplicationInsights.Extensibility;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,6 +19,18 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
 builder.Services.AddApplicationInsightsTelemetry();
+builder.Services.AddSingleton<ITelemetryInitializer, ActivityEnricher>();
+builder.Logging.AddApplicationInsights();
+
+builder.Logging.Configure(options =>
+{
+    options.ActivityTrackingOptions = 
+        ActivityTrackingOptions.SpanId |
+        ActivityTrackingOptions.TraceId |
+        ActivityTrackingOptions.ParentId |
+        ActivityTrackingOptions.Tags |
+        ActivityTrackingOptions.Baggage;
+});
 
 builder.Services.Configure<BookBoostDatabaseSettings>(
     builder.Configuration.GetSection("BookBoostDatabase")
@@ -116,6 +129,7 @@ app.UseCors();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
+app.UseMiddleware<ActivityTaggingMiddleware>();
 app.UseAuthorization();
 
 app.MapControllers();

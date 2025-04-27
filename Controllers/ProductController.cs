@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Models;
 using BookBoostApi.Interfaces;
 using Microsoft.AspNetCore.Authorization;
+using System.Diagnostics;
 
 namespace BookBoostApi.Controllers;
 
@@ -13,10 +14,13 @@ public class ProductController : ControllerBase
 
     private IPriceService _priceService;
 
-    public ProductController(IProductService productService, IPriceService priceService)
+    ILogger<ProductController> _logger;
+
+    public ProductController(IProductService productService, IPriceService priceService, ILogger<ProductController> logger)
     {
         _productService = productService;
         _priceService = priceService;
+        _logger = logger;
     }
 
     [HttpPost("Load")]
@@ -37,6 +41,11 @@ public class ProductController : ControllerBase
     [Authorize]
     public async Task<IActionResult> ValidateProduct([FromBody] ProductValidate product)
     {
+        var activity = Activity.Current;
+        if(activity != null)
+        {
+            activity.SetTag("ProductId", product.ProductId);
+        }
         var result = await _productService.GetProductFromSource(product);
         return result != null ? Ok(result) : NotFound();
     }
@@ -61,5 +70,12 @@ public class ProductController : ControllerBase
     public IActionResult GetProductPrices()
     {
         return Ok(_priceService.GetProductPrices());
+    }
+
+    [HttpPost("Test")]
+    [Authorize]
+    public IActionResult Test([FromBody] ProductSearch product)
+    {
+        return StatusCode(500);
     }
 }
