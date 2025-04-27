@@ -33,11 +33,11 @@ public class ProductController : ControllerBase
         return await _productService.GetProducts();
     }
 
-    [HttpPost]
+    [HttpPost("Validate")]
     [Authorize]
-    public async Task<IActionResult> GetProduct([FromBody] ProductUpload productUpload)
+    public async Task<IActionResult> ValidateProduct([FromBody] ProductValidate product)
     {
-        var result = await _productService.GetProductFromSource(productUpload);
+        var result = await _productService.GetProductFromSource(product);
         return result != null ? Ok(result) : NotFound();
     }
 

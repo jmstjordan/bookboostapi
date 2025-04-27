@@ -63,6 +63,11 @@ public class PaymentController : ControllerBase
             _logger.LogError(e.StripeError.Message);
             return StatusCode(500);
         }
+        catch (ProductException e)
+        {
+            _logger.LogError(e.Message);
+            return BadRequest(e.Message);
+        }
         catch(NotImplementedException e)
         {
             return BadRequest(e.Message);

@@ -33,33 +33,25 @@ public class ProductService : IProductService
         // // and any other products, apple, google, barns and noble, etc.
     }
 
-    public async Task<Product> GetProductFromSource(ProductUpload product)
+    public async Task<Product> GetProductFromSource(ProductValidate product)
     {
-        string key = product.GetCacheKey();
-        if (!_memoryCache.TryGetValue(key, out Product cacheValue))
+        switch(product.ProductSource)
         {
-            _logger.LogInformation($"Cache Miss: {key}");
-            switch(product.ProductSource)
-            {
-                case ProductSource.Amazon:
-                    var amazonProduct = await _amazonProductService.GetProduct(product.ProductId);
-                    if(amazonProduct == null)
-                    {
-                        return null;
-                    }
-                    if(amazonProduct.Description != null)
-                    {
-                        amazonProduct.DescriptionTrim = await _aiService.TrimDescription(amazonProduct.Description, 250);
-                    }
-                    _memoryCache.Set(key, amazonProduct, new MemoryCacheEntryOptions()
-                        .SetSlidingExpiration(TimeSpan.FromDays(1)));
-                    return amazonProduct;
-                default:
-                    throw new NotImplementedException("Product Source Not Implemented");
-            }
+            case ProductSource.Amazon:
+                var amazonProduct = await _amazonProductService.GetProduct(product.ProductId);
+                if(amazonProduct == null)
+                {
+                    _logger.LogError($"Unable to find product from source: {product.ProductSource} {product.ProductId}");
+                    throw new ProductException("Unable to find product from source");
+                }
+                if(amazonProduct.Description != null)
+                {
+                    amazonProduct.DescriptionTrim = await _aiService.TrimDescription(amazonProduct.Description, 250);
+                }
+                return amazonProduct;
+            default:
+                throw new NotImplementedException("Product Source Not Implemented");
         }
-        _logger.LogInformation($"Cache Hit {key}");
-        return cacheValue;
     }
 
     public async Task<IEnumerable<Product>> GetProducts()
@@ -90,28 +82,24 @@ public class ProductService : IProductService
         await _productsCollection.InsertManyAsync(results);
     }
 
-    public async Task<Product> CreateProduct(ProductUpload product, string? userId = null)
+    public async Task<Product> CreateProduct(ProductUpload productUpload, string? userId = null)
     {
-        var newProduct = await GetProductFromSource(product);
-        if(newProduct == null)
+        var product = await GetProductFromSource(productUpload);
+        product.OfferPrice = productUpload.OfferPrice;
+        if(productUpload.DescriptionView != null)
         {
-            return null;
+            product.DescriptionView = productUpload.DescriptionView;
         }
-        newProduct.OfferPrice = product.OfferPrice;
-        if(product.DescriptionView != null)
+        if(productUpload.TitleView != null)
         {
-            newProduct.DescriptionView = product.DescriptionView;
-        }
-        if(product.TitleView != null)
-        {
-            newProduct.TitleView = product.TitleView;
+            product.TitleView = productUpload.TitleView;
         }
         if(userId != null)
         {
-            newProduct.UserId = userId;
+            product.UserId = userId;
         }
-        await _productsCollection.InsertOneAsync(newProduct);
-        return newProduct;
+        await _productsCollection.InsertOneAsync(product);
+        return product;
     }
 
     public async Task<Product> GetProduct(string id)

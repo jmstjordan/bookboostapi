@@ -9,7 +9,7 @@ public interface IProductService
 
     public Task LoadProducts(ProductSearch productSearch);
 
-    public Task<Product> GetProductFromSource(ProductUpload product);
+    public Task<Product> GetProductFromSource(ProductValidate product);
 
     public Task<Product> GetProduct(string id);
 

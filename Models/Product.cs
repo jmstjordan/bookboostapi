@@ -49,32 +49,25 @@ public class Product
     public int NumReviews { get; set; }
 
     public string? Image { get; set; }
-
-    public string GetCacheKey()
-    {
-        return this.ProductId + this.ProductSource;
-    }
 }
 
-public class ProductUpload
+public class ProductValidate
 {
     public required string ProductId { get; set; }
 
     [BsonRepresentation(BsonType.String)]
     public required ProductSource ProductSource { get; set; }
+}
+
+public class ProductUpload : ProductValidate
+{
+    public required int OfferPrice { get; set; }
 
     [MaxLength(200)]
     public string? TitleView { get; set; }
 
     [MaxLength(1000)]
     public string? DescriptionView { get; set; }
-
-    public int OfferPrice { get; set; }
-
-    public string GetCacheKey()
-    {
-        return this.ProductId + this.ProductSource;
-    }
 }
 
 public class ProductSearch
@@ -86,9 +79,4 @@ public class ProductSearch
     public string? SortBy { get; set; }
 
     public string? SearchTerm { get; set; }
-
-    public string GetCacheKey()
-    {
-        return $"{this.CategoryId}_{this.SortBy}_{this.SearchTerm}";
-    }
 }
