@@ -14,13 +14,10 @@ public class ProductController : ControllerBase
 
     private IPriceService _priceService;
 
-    ILogger<ProductController> _logger;
-
     public ProductController(IProductService productService, IPriceService priceService, ILogger<ProductController> logger)
     {
         _productService = productService;
         _priceService = priceService;
-        _logger = logger;
     }
 
     [HttpPost("Load")]
@@ -70,12 +67,5 @@ public class ProductController : ControllerBase
     public IActionResult GetProductPrices()
     {
         return Ok(_priceService.GetProductPrices());
-    }
-
-    [HttpPost("Test")]
-    [Authorize]
-    public IActionResult Test([FromBody] ProductSearch product)
-    {
-        return StatusCode(500);
     }
 }
