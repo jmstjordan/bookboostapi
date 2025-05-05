@@ -51,4 +51,43 @@ public class Price
     [JsonPropertyName("value")]
     public double Value { get; set; }
 
+    public int? GetPrice()
+    {
+        return Convert.ToInt32(Value * 100);
+        if(Value > 0)
+        {
+            // cents
+            return Convert.ToInt32(Value * 100);
+        }
+        var price = ParseStringPrice(ListPrice);
+        if(price != null)
+        {
+            return price;
+        }
+        price = ParseStringPrice(Raw);
+        if(price != null)
+        {
+            return price;
+        }
+        return null;
+    }
+
+    public int? ParseStringPrice(string amount)
+    {
+        if (string.IsNullOrWhiteSpace(amount))
+        {
+            return null;
+        }
+
+        // Remove dollar signs and trim
+        var cleaned = amount.Replace("$", "").Trim();
+
+        // Try parsing as decimal
+        if (decimal.TryParse(cleaned, out decimal value))
+        {
+            return Convert.ToInt32(value * 100);
+        }
+        return null;
+    }
+
 }

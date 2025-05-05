@@ -4,6 +4,7 @@ using BookBoostApi.Interfaces;
 using BookBoostApi.Models;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 public class ProductService : IProductService
@@ -46,7 +47,11 @@ public class ProductService : IProductService
                 }
                 if(amazonProduct.Description != null)
                 {
-                    amazonProduct.DescriptionTrim = await _aiService.TrimDescription(amazonProduct.Description, 250);
+                    amazonProduct.Description = await _aiService.TrimDescription(amazonProduct.Description, 250);
+                }
+                if(amazonProduct.Title != null)
+                {
+                    amazonProduct.Title = await _aiService.TrimTitle(amazonProduct.Title);
                 }
                 return amazonProduct;
             default:
@@ -60,8 +65,7 @@ public class ProductService : IProductService
         if (!_memoryCache.TryGetValue(key, out List<Product> cacheValue))
         {
             _logger.LogInformation($"Cache Miss: {key}");
-            var results = await _productsCollection.Find(FilterDefinition<Product>.Empty).ToListAsync();
-
+            var results = await BestProducts();
             // TODO: add search params
             _memoryCache.Set(key, results,  new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromDays(1)));
@@ -69,6 +73,62 @@ public class ProductService : IProductService
         }
         _logger.LogInformation($"Cache Hit {key}");
         return cacheValue;
+    }
+
+    private async Task<List<Product>> BestProducts()
+    {
+        var pipeline = new[]
+        {
+            // Step 1: Add hasUser flag (1 if UserId exists, 0 otherwise)
+            new BsonDocument("$addFields", new BsonDocument("hasUser", new BsonDocument("$cond", new BsonArray {
+                new BsonDocument("$ifNull", new BsonArray { "$UserId", false }),
+                1,
+                0
+            }))),
+
+            // Step 2: Sort by hasUser desc, Rating desc, Created desc
+            new BsonDocument("$sort", new BsonDocument
+            {
+                { "hasUser", -1 },
+                { "Rating", -1 },
+                { "Created", -1 }
+            }),
+
+            // Step 3: Group by ProductId to deduplicate
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", "$ProductId" },
+                { "doc", new BsonDocument("$first", "$$ROOT") }
+            }),
+
+            // Step 4: Replace root with the doc
+            new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$doc")),
+
+            // Step 5: Limit to 24
+            new BsonDocument("$limit", 24),
+
+            new BsonDocument("$project", new BsonDocument
+            {
+                { "Id", 1 },
+                { "Created", 1 },
+                { "ProductId", 1 },
+                { "UserId", 1 },
+                { "ProductSource", 1 },
+                { "Title", 1 },
+                { "TitleView", 1 },
+                { "Description", 1 },
+                { "DescriptionView", 1 },
+                { "Link", 1 },
+                { "Price", 1 },
+                { "OfferPrice", 1 },
+                { "Rating", 1 },
+                { "NumReviews", 1 },
+                { "Image", 1 },
+                { "Author", 1 }
+            })
+        };
+
+        return await _productsCollection.Aggregate<Product>(pipeline).ToListAsync();
     }
 
     public IEnumerable<ProductSource> GetProductSources()

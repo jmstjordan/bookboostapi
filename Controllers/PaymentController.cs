@@ -104,6 +104,10 @@ public class PaymentController : ControllerBase
         }
         var userId = HttpContext.GetUserId();
         var ad = await _adService.GetAdBySessionId(userId, sessionId);
+        if(ad.PaymentIntentId != null)
+        {
+            return NoContent();
+        }
         await _adService.UpdateField(ad.Id, "PaymentMethodId", paymentMethodId);
         await _emailService.SendAdCreated(userId, ad);
 

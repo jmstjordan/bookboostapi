@@ -18,7 +18,14 @@ public class OpenAiService : IAiService
     {
         ChatClient client = new(model: "gpt-4o", apiKey: _apiKey);
         _logger.LogInformation($"Trimming description from {desciption.Length} to {length}");
-        ChatCompletion completion = await client.CompleteChatAsync($"Trim the following description to {length} characters: {desciption}");
+        ChatCompletion completion = await client.CompleteChatAsync($"Trim this description to {length} characters and only reply with the description: {desciption}");
+        return completion.Content[0].Text;
+    }
+
+    public async Task<string> TrimTitle(string title)
+    {
+        ChatClient client = new(model: "gpt-4o", apiKey: _apiKey);
+        ChatCompletion completion = await client.CompleteChatAsync($"Can you give me the main title of this and only reply with the main title: {title}");
         return completion.Content[0].Text;
     }
 }

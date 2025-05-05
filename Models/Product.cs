@@ -28,27 +28,29 @@ public class Product
     public required ProductSource ProductSource { get; set; }
 
     public required string Title { get; set; }
-
+    
     public string? TitleView { get; set; }
 
-    [JsonIgnore]
     public string? Description { get; set; }
 
-    public string? DescriptionTrim { get; set; }
+    // public string? DescriptionTrim { get; set; }
 
     public string? DescriptionView { get; set; }
 
     public string? Link { get; set; }
 
-    public Price? Price { get; set; }
+    public int? Price { get; set; }
 
-    public int OfferPrice { get; set; }
+    public int? OfferPrice { get; set; }
 
     public double Rating { get; set; }
 
     public int NumReviews { get; set; }
 
     public string? Image { get; set; }
+
+    public Author? Author { get; set; }
+
 }
 
 public class ProductValidate

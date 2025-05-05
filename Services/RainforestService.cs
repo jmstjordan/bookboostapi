@@ -60,12 +60,13 @@ public class RainforestService : IAmazonProductService
             ProductId = asin,
             Title = response.Product.Title,
             Description = response.Product.BookDescription,
-            Price = variant?.Price,
+            Price = variant?.Price.GetPrice(),
             NumReviews = response.Product.RatingsTotal,
             Link = response.Product.Link,
             Rating = response.Product.Rating,
             Image = response.Product.MainImage?.Link,
-            ProductSource = ProductSource.Amazon
+            ProductSource = ProductSource.Amazon,
+            Author = response.Product.Authors.FirstOrDefault()
         };
         return product;
     }
@@ -82,6 +83,7 @@ public class RainforestService : IAmazonProductService
             .AddParameter("category_id", productSearch.CategoryId)
             .AddParameter("type", "search")
             .AddParameter("sort_by", productSearch.SortBy ?? DEFAULT_SORT_BY)
+            .AddParameter("limit", 24)
             .AddParameter("search_term", productSearch.SearchTerm ?? DEFAULT_SEARCH_TERM);
 
         // TODO: Consider cancelation token from client here as a param
@@ -97,17 +99,8 @@ public class RainforestService : IAmazonProductService
         var products = new List<Product>();
         foreach(RainforestSearchResult result in response.SearchResults)
         {
-            products.Add(new Product
-            {
-                Title = result.Title,
-                Link = result.Link,
-                Rating = result.Rating,
-                Price = result.Price,
-                ProductId = result.Asin,
-                Image = result.Image,
-                NumReviews = result.RatingsTotal,
-                ProductSource = ProductSource.Amazon
-            });
+            var getProduct = await GetProduct(result.Asin);
+            products.Add(getProduct);
         }
         return products;
     }
