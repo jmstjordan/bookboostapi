@@ -33,8 +33,6 @@ public class Product
 
     public string? Description { get; set; }
 
-    // public string? DescriptionTrim { get; set; }
-
     public string? DescriptionView { get; set; }
 
     public string? Link { get; set; }
@@ -50,6 +48,9 @@ public class Product
     public string? Image { get; set; }
 
     public Author? Author { get; set; }
+
+    [BsonRepresentation(BsonType.String)]
+    public List<Genre> Genres { get; set; }
 
 }
 

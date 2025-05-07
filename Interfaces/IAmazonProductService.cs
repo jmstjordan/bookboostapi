@@ -5,8 +5,8 @@ namespace BookBoostApi.Interfaces;
 
 public interface IAmazonProductService
 {
-    public Task<Product> GetProduct(string asin);
+    public Task<RainforestProductResponse> GetProduct(string asin);
 
-    public Task<IEnumerable<Product>> GetProducts(ProductSearch productSearch);
+    public Task<IEnumerable<RainforestProductResponse>> GetProducts(ProductSearch productSearch);
 }
 

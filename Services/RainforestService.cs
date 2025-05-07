@@ -27,7 +27,7 @@ public class RainforestService : IAmazonProductService
         _logger = logger;
     }
 
-    public async Task<Product> GetProduct(string asin)
+    public async Task<RainforestProductResponse> GetProduct(string asin)
     {
         var options = new RestClientOptions(API_URL);
         var client = new RestClient(options);
@@ -53,25 +53,10 @@ public class RainforestService : IAmazonProductService
             _logger.LogError($"Error getting product from Rainforest API for ASIN: {asin} {e.StatusCode} {e.StackTrace}");
             return null;
         }
-
-        var variant = response.Product.Variants.Find(x => x.Id == asin);
-        var product = new Product
-        {
-            ProductId = asin,
-            Title = response.Product.Title,
-            Description = response.Product.BookDescription,
-            Price = variant?.Price.GetPrice(),
-            NumReviews = response.Product.RatingsTotal,
-            Link = response.Product.Link,
-            Rating = response.Product.Rating,
-            Image = response.Product.MainImage?.Link,
-            ProductSource = ProductSource.Amazon,
-            Author = response.Product.Authors.FirstOrDefault()
-        };
-        return product;
+        return response;
     }
 
-    public async Task<IEnumerable<Product>> GetProducts(ProductSearch productSearch)
+    public async Task<IEnumerable<RainforestProductResponse>> GetProducts(ProductSearch productSearch)
     {
         var options = new RestClientOptions(API_URL);
         var client = new RestClient(options);
@@ -94,9 +79,9 @@ public class RainforestService : IAmazonProductService
         }
         catch(HttpRequestException)
         {
-            return new List<Product>();
+            return new List<RainforestProductResponse>();
         }
-        var products = new List<Product>();
+        var products = new List<RainforestProductResponse>();
         foreach(RainforestSearchResult result in response.SearchResults)
         {
             var getProduct = await GetProduct(result.Asin);

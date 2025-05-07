@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace BookBoostApi.Models;
 
 using System.Text.Json.Serialization;
@@ -8,13 +6,15 @@ public class RainforestProductResponse
 {
     [JsonPropertyName("product")]
     public RainforestProduct Product { get; set; }
-
 }
 
 public class RainforestProduct
 {
     [JsonPropertyName("title")]
     public string Title { get; set; }
+
+    [JsonPropertyName("asin")]
+    public string Asin { get; set; }
 
     [JsonPropertyName("book_description")]
     public string BookDescription { get; set; }
@@ -37,6 +37,20 @@ public class RainforestProduct
     [JsonPropertyName("authors")]
     public List<Author> Authors { get; set; }
 
+    [JsonPropertyName("categories")]
+    public List<Category> Categories { get; set; }
+}
+
+public class Category
+{
+    [JsonPropertyName("name")]
+    public string Name { get; set; }
+
+    [JsonPropertyName("link")]
+    public string Link { get; set; }
+
+    [JsonPropertyName("category_id")]
+    public string CategoryId { get; set; }
 }
 
 public class Author

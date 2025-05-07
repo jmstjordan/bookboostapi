@@ -39,24 +39,50 @@ public class ProductService : IProductService
         switch(product.ProductSource)
         {
             case ProductSource.Amazon:
-                var amazonProduct = await _amazonProductService.GetProduct(product.ProductId);
-                if(amazonProduct == null)
+                var response = await _amazonProductService.GetProduct(product.ProductId);
+                if(response == null)
                 {
                     _logger.LogError($"Unable to find product from source: {product.ProductSource} {product.ProductId}");
                     throw new ProductException("Unable to find product from source");
                 }
-                if(amazonProduct.Description != null)
-                {
-                    amazonProduct.Description = await _aiService.TrimDescription(amazonProduct.Description, 250);
-                }
-                if(amazonProduct.Title != null)
-                {
-                    amazonProduct.Title = await _aiService.TrimTitle(amazonProduct.Title);
-                }
-                return amazonProduct;
+                return await BuildAmazonProduct(response, product.ProductId);
             default:
                 throw new NotImplementedException("Product Source Not Implemented");
         }
+    }
+
+    private async Task<Product> BuildAmazonProduct(RainforestProductResponse response, string productId)
+    {
+        var variant = response.Product.Variants.Find(x => x.Id == productId);
+        var newProduct = new Product
+        {
+            ProductId = productId,
+            Title = await _aiService.TrimTitle(response.Product.Title),
+            Description = await _aiService.TrimDescription(response.Product.BookDescription, 250),
+            Price = variant?.Price.GetPrice(),
+            NumReviews = response.Product.RatingsTotal,
+            Link = response.Product.Link,
+            Rating = response.Product.Rating,
+            Image = response.Product.MainImage?.Link,
+            ProductSource = ProductSource.Amazon,
+            Author = response.Product.Authors.FirstOrDefault(),
+        };
+        try
+        {
+            if(response.Product.Categories != null && response.Product.Categories.Count > 0)
+            {
+                var genres = (Genre[])Enum.GetValues(typeof(Genre));
+                var categories = response.Product.Categories.Select(c => c.Name).ToList();
+                var selectGenres = await _aiService.GetCategories(categories, genres.Select(g => g.ToString()).ToList());
+                newProduct.Genres = selectGenres.Select(s => (Genre)Enum.Parse(typeof(Genre), s)).ToList();
+            }
+        }
+        catch(Exception e)
+        {
+            _logger.LogError(e.StackTrace);
+            _logger.LogInformation($"Unable to get category for {productId}");
+        }
+        return newProduct;
     }
 
     public async Task<IEnumerable<Product>> GetProducts()
@@ -66,6 +92,7 @@ public class ProductService : IProductService
         {
             _logger.LogInformation($"Cache Miss: {key}");
             var results = await BestProducts();
+            // TODO: depriortize books that were never actually approved/paid
             // TODO: add search params
             _memoryCache.Set(key, results,  new MemoryCacheEntryOptions()
                 .SetSlidingExpiration(TimeSpan.FromDays(1)));
@@ -124,7 +151,8 @@ public class ProductService : IProductService
                 { "Rating", 1 },
                 { "NumReviews", 1 },
                 { "Image", 1 },
-                { "Author", 1 }
+                { "Author", 1 },
+                { "Genres", 1 },
             })
         };
 
@@ -139,7 +167,12 @@ public class ProductService : IProductService
     public async Task LoadProducts(ProductSearch productSearch)
     {
         var results = await _amazonProductService.GetProducts(productSearch);
-        await _productsCollection.InsertManyAsync(results);
+        var products = new List<Product>();
+        foreach(var response in results)
+        {
+            products.Add(await BuildAmazonProduct(response, response.Product.Asin));
+        }
+        await _productsCollection.InsertManyAsync(products);
     }
 
     public async Task<Product> CreateProduct(ProductUpload productUpload, string? userId = null)

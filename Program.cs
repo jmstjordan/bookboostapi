@@ -108,6 +108,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             RoleClaimType = ClaimTypes.Role 
         };
 
+        options.Events = new JwtBearerEvents
+        {
+            OnTokenValidated = context =>
+            {
+                var identity = context.Principal.Identity as ClaimsIdentity;
+
+                var roleClaim = identity?.FindFirst(ClaimTypes.Role);
+                if (roleClaim != null && roleClaim.Value.Contains(","))
+                {
+                    var roles = roleClaim.Value.Split(",", StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var role in roles)
+                    {
+                        identity.AddClaim(new Claim(ClaimTypes.Role, role.Trim()));
+                    }
+                }
+
+                return Task.CompletedTask;
+            }
+        };
+
         options.SaveToken = true; // Save the JWT token in the HTTP context
     });
 

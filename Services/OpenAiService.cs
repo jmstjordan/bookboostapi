@@ -28,5 +28,13 @@ public class OpenAiService : IAiService
         ChatCompletion completion = await client.CompleteChatAsync($"Can you give me the main title of this and only reply with the main title: {title}");
         return completion.Content[0].Text;
     }
+
+    public async Task<List<string>> GetCategories(List<string> categories, List<string> genres)
+    {
+        var categoryRequest = $"What genres does a product with these categories belong to: {string.Join(", ", categories)}. The choices are {string.Join(", ", genres)}. You can choose more than one. Reply only with one or more of those choices.";
+        ChatClient client = new(model: "gpt-4o", apiKey: _apiKey);
+        ChatCompletion completion = await client.CompleteChatAsync(categoryRequest);
+        return completion.Content[0].Text.Split(",").ToList();
+    }
 }
     
