@@ -11,7 +11,7 @@ public class Subscriber : SubscriberUpload
 {
     public bool IsSubscribed { get; set; } = true;
 
-    public DateTime Created { get; set; } = DateTime.Now;
+    public DateTime Created { get; set; } = DateTime.UtcNow;
 }
 
 public enum SubscriberSource

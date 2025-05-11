@@ -39,7 +39,7 @@ public class Ad
     [BsonRepresentation(BsonType.ObjectId)]
     public required string ProductId { get; set; }
 
-    public DateTime Created { get; set; } = DateTime.Now;
+    public DateTime Created { get; set; } = DateTime.UtcNow;
 
     public DateTime? RunDate { get; set; }
     

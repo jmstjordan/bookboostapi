@@ -28,7 +28,7 @@ public class SubscriberService : ISubscriberService
 
         var update = Builders<Subscriber>.Update
             .Set(u => u.IsSubscribed, subscriber.IsSubscribed)
-            .SetOnInsert(u => u.Created, DateTime.Now); // Only set Created if inserting
+            .SetOnInsert(u => u.Created, DateTime.UtcNow); // Only set Created if inserting
 
         var options = new UpdateOptions { IsUpsert = true };
         await _subscriberCollection.UpdateOneAsync(filter, update, options);

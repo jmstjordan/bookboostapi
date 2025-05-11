@@ -134,7 +134,7 @@ public class AdService : IAdService
         }
         else
         {
-            startDate = DateTime.Now.AddDays(MIN_DAYS);
+            startDate = DateTime.UtcNow.AddDays(MIN_DAYS);
             endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
         }
         var allDates = Enumerable.Range(0, (endDate - startDate).Days)

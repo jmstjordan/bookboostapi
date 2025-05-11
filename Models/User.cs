@@ -32,7 +32,7 @@ public class User
 
     public string? CustomerId { get; set; }
 
-    public DateTime Created { get; set; } = DateTime.Now;
+    public DateTime Created { get; set; } = DateTime.UtcNow;
 }
 
 public class Preferences

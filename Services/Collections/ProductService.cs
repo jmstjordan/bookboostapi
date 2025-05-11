@@ -175,9 +175,13 @@ public class ProductService : IProductService
         await _productsCollection.InsertManyAsync(products);
     }
 
-    public async Task<Product> CreateProduct(ProductUpload productUpload, string? userId = null)
+    public async Task<Product> CreateProduct(ProductUpload productUpload, string userId)
     {
-        var product = await GetProductFromSource(productUpload);
+        var product = await CheckProductCache(productUpload.ProductId, userId);
+        if(product == null)
+        {
+            product = await GetProductFromSource(productUpload);
+        }
         product.OfferPrice = productUpload.OfferPrice;
         if(productUpload.DescriptionView != null)
         {
@@ -191,8 +195,13 @@ public class ProductService : IProductService
         {
             product.UserId = userId;
         }
-        await _productsCollection.InsertOneAsync(product);
+        await UpsertProduct(product);
         return product;
+    }
+
+    private async Task<Product> CheckProductCache(string productId, string userId)
+    {
+        return await _productsCollection.Find(x => x.UserId == userId && x.ProductId == productId && x.Created >= DateTime.UtcNow.AddHours(-1)).FirstOrDefaultAsync();
     }
 
     public async Task<Product> GetProduct(string id)
@@ -203,5 +212,17 @@ public class ProductService : IProductService
     public async Task<IEnumerable<Product>> GetProductsByUser(string userId)
     {
         return await _productsCollection.Find(x => x.UserId == userId).ToListAsync();
+    }
+
+    public async Task AddProduct(Product product)
+    {
+        await _productsCollection.InsertOneAsync(product);
+    }
+
+    public async Task UpsertProduct(Product product)
+    {
+        var filter = Builders<Product>.Filter.Where(p => p.Id == product.Id);
+        var options = new ReplaceOptions { IsUpsert = true };
+        await _productsCollection.ReplaceOneAsync(filter, product, options);
     }
 }

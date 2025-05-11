@@ -44,7 +44,13 @@ public class ProductController : ControllerBase
             activity.SetTag("ProductId", product.ProductId);
         }
         var result = await _productService.GetProductFromSource(product);
-        return result != null ? Ok(result) : NotFound();
+        if(result != null)
+        {
+            result.UserId = HttpContext.GetUserId();
+            await _productService.AddProduct(result);
+            return Ok(result);
+        }
+        return NotFound();
     }
 
     [HttpGet("Me")]

@@ -17,7 +17,8 @@ public interface IProductService
 
     public IEnumerable<ProductSource> GetProductSources();
 
-    public Task<Product> CreateProduct(ProductUpload product, string? userId = null);
+    public Task<Product> CreateProduct(ProductUpload product, string userId);
 
+    public Task AddProduct(Product product);
 }
 
