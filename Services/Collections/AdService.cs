@@ -12,7 +12,8 @@ public class AdService : IAdService
 {
     private readonly IMongoCollection<Ad> _adsCollection;
     private IProductService _productService;
-    private const int LENGTH_OF_AD_CALENDER = 90;
+    private const int MIN_DAYS = 30;
+    private const int LENGTH_OF_AD_CALENDER = 60;
     private const int MAX_AD_PER_DAY = 5;
 
     public AdService(IOptions<BookBoostDatabaseSettings> bookBoostDatabaseSettings, IProductService productService)
@@ -124,10 +125,18 @@ public class AdService : IAdService
 
     public async Task<IEnumerable<AdAvailability>> AvailableAdDates(Genre genre)
     {
-        // Define the date range
-        DateTime startDate = DateTime.Now.AddDays(1);
-        DateTime endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
-
+        DateTime startDate;
+        DateTime endDate;
+        if(DateTime.Today < new DateTime(2025, 8, 1))
+        {
+            startDate = new DateTime(2025, 9, 1);
+            endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
+        }
+        else
+        {
+            startDate = DateTime.Now.AddDays(MIN_DAYS);
+            endDate = startDate.AddDays(LENGTH_OF_AD_CALENDER);
+        }
         var allDates = Enumerable.Range(0, (endDate - startDate).Days)
                                  .Select(offset => startDate.AddDays(offset).ToString("yyyy-MM-dd"))
                                  .ToList();
