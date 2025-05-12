@@ -41,28 +41,31 @@ public class AdController : ControllerBase
     {
         // only supports state change for now
         var currentAd = await _adService.GetAd(id);
-        if(currentAd.State == AdState.Accepted)
+        if(currentAd.State != AdState.Pending)
         {
-            return BadRequest("This ad is already accepted");
+            return BadRequest("This ad is not in a pending state. Please create a new one.");
         }
-        await _adService.UpdateField(id, "State", ad.State);
-
-        // retrieving ad one more time for safety and I'm too lazy to update my update function
-        currentAd = await _adService.GetAd(id);
-        if(currentAd.State == AdState.Accepted)
+        if(ad.State == AdState.Accepted)
         {
-            await _paymentService.ChargeAd(currentAd);
-            await _emailService.SendAdAccepted(currentAd.UserId, currentAd);
+            if(await _paymentService.ChargeAd(currentAd))
+            {
+                await _emailService.SendAdAccepted(currentAd.UserId, currentAd);
+            }
+            else
+            {
+                return BadRequest("Unable to charge user for ad");
+            }
         }
-        else if(currentAd.State == AdState.Declined)
+        else if(ad.State == AdState.Declined)
         {
             await _emailService.SendAdDeclined(currentAd.UserId, currentAd);
         }        
-        else if(currentAd.State == AdState.Canceled)
+        else if(ad.State == AdState.Canceled)
         {
             await _emailService.SendAdDeclined(currentAd.UserId, currentAd);
         }
-        return Ok(currentAd.State);
+        await _adService.UpdateField(id, "State", ad.State);
+        return Ok(ad.State);
     }
 
     [HttpPost("{id}/Cancel")]

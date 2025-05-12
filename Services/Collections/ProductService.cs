@@ -134,6 +134,23 @@ public class ProductService : IProductService
             // Step 5: Limit to 24
             new BsonDocument("$limit", 24),
 
+            // Step 6: Join with 'ad' collection on ProductId
+            new BsonDocument("$lookup", new BsonDocument
+            {
+                { "from", "ad" },
+                { "localField", "ProductId" },
+                { "foreignField", "productId" }, // adjust field name if needed
+                { "as", "ad" }
+            }),
+
+            // Step 7: Unwrap the single ad object (since it's 1:1)
+            new BsonDocument("$unwind", new BsonDocument
+            {
+                { "path", "$ad" },
+                { "preserveNullAndEmptyArrays", true }
+            }),
+
+            // Step 8: Project final shape
             new BsonDocument("$project", new BsonDocument
             {
                 { "Id", 1 },
@@ -153,10 +170,12 @@ public class ProductService : IProductService
                 { "Image", 1 },
                 { "Author", 1 },
                 { "Genres", 1 },
+                { "Ad", "$ad" } // include the joined ad document
             })
         };
-
-        return await _productsCollection.Aggregate<Product>(pipeline).ToListAsync();
+        var products = await _productsCollection.Aggregate<Product>(pipeline).ToListAsync();
+        // TODO: Add check for the product was paid via grabbing the ad's intentId
+        return products;
     }
 
     public IEnumerable<ProductSource> GetProductSources()

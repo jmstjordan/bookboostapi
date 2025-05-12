@@ -22,6 +22,7 @@ public class Product
     public required string ProductId { get; set; }
 
     [BsonRepresentation(BsonType.ObjectId)]
+    [BsonIgnoreIfNull]
     public string? UserId { get; set; }
 
     [BsonRepresentation(BsonType.String)]
@@ -29,16 +30,22 @@ public class Product
 
     public required string Title { get; set; }
     
+    [BsonIgnoreIfNull]
     public string? TitleView { get; set; }
 
+    [BsonIgnoreIfNull]
     public string? Description { get; set; }
 
+    [BsonIgnoreIfNull]
     public string? DescriptionView { get; set; }
 
+    [BsonIgnoreIfNull]
     public string? Link { get; set; }
 
+    [BsonIgnoreIfNull]
     public int? Price { get; set; }
 
+    [BsonIgnoreIfNull]
     public int? OfferPrice { get; set; }
 
     public double Rating { get; set; }
@@ -47,11 +54,14 @@ public class Product
 
     public string? Image { get; set; }
 
+    [BsonIgnoreIfNull]
     public Author? Author { get; set; }
 
     [BsonRepresentation(BsonType.String)]
     public List<Genre> Genres { get; set; }
 
+    [BsonIgnore]
+    public Ad? Ad { get; set; }
 }
 
 public class ProductValidate
