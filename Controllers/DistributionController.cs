@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using BookBoostApi.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BookBoostApi.Controllers;
 
@@ -27,7 +28,44 @@ public class DistributionController : ControllerBase
             Email = subscriberUpload.Email,
             SubscriberSource = subscriberUpload.SubscriberSource
         };
-        await _subscriberService.AddSubscriber(subscriber);
+        await _subscriberService.UpsertSubscriber(subscriber);
         return NoContent();
+    }
+
+    [HttpGet("Subscriber")]
+    public async Task<IActionResult> GetSubscriber()
+    {
+        var userId = HttpContext.GetUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        return Ok(await _subscriberService.GetSubscriberByUserId(userId));
+    }
+
+    [HttpPatch("Subscriber/Preferences")]
+    [Authorize]
+    public async Task<IActionResult> UpdateSubscriberPreferences([FromBody] Preferences preferences)
+    {
+        var userId = HttpContext.GetUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        var updated = await _subscriberService.UpdatePreferences(userId, preferences);
+        return Ok(updated);
+    }
+
+    [HttpPatch("Subscriber/Subscribe")]
+    [Authorize]
+    public async Task<IActionResult> Subscribe([FromBody] SubscribeUpload subscribe)
+    {
+        var userId = HttpContext.GetUserId();
+        if (userId == null)
+        {
+            return Unauthorized();
+        }
+        await _subscriberService.Subscribe(userId, subscribe.Subscribe);
+        return Ok();
     }
 }

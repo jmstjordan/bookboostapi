@@ -28,17 +28,4 @@ public class UserController : ControllerBase
         }
         return Ok(user);
     }
-
-    [HttpPost("Preferences")]
-    [Authorize]
-    public async Task<IActionResult> UpdateUserPreferences([FromBody] Preferences preferences)
-    {
-        var userId = HttpContext.GetUserId();
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-        var updated = await _userService.UpdatePreferences(userId, preferences);
-        return Ok(updated);
-    }
 }

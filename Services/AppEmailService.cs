@@ -65,9 +65,10 @@ public class AppEmailService : IAppEmailService
         return await RenderAndSend(TemplateType.AdCanceled, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
-    public async Task<bool> SendUserCreated(User user)
+    public async Task<bool> SendUserCreated(User user, Role role)
     {
-        return await RenderAndSend(TemplateType.UserCreated, new { Username = user.Username, Email = user.Email }, user.Email);
+        var template = role == Role.Author ? TemplateType.AuthorCreated : TemplateType.ReaderCreated;
+        return await RenderAndSend(template, new { Username = user.Username, Email = user.Email }, user.Email);
     }
 
     public async Task<bool> SendPromotionJoined(string userId)

@@ -13,8 +13,10 @@ public class User
 
     public string? Username { get; set; }
 
+    [BsonIgnoreIfNull]
     public string? Name { get; set; }
 
+    [BsonIgnoreIfNull]
     public string? ProfilePicture { get; set; }
 
     public required string Email { get; set; }
@@ -22,26 +24,24 @@ public class User
     [JsonIgnore]
     public string? PasswordHash { get; set;}
 
-    public Preferences? Preferences { get; set; }
-
     [BsonRepresentation(BsonType.String)]
     public Role Role { get; set; }
 
     [JsonIgnore]
     public bool IsAdmin { get; set; }
 
+    [BsonIgnoreIfNull]
     public string? CustomerId { get; set; }
 
     public DateTime Created { get; set; } = DateTime.UtcNow;
-}
 
-public class Preferences
-{
-    public Genre[]? Genres { get; set; }
+    [BsonRepresentation(BsonType.ObjectId)]
+    public required string SubscriberId { get; set; }
+
 }
 
 public enum Role
 {
-    Reader = 1,
-    Author = 2
+    Reader,
+    Author
 }

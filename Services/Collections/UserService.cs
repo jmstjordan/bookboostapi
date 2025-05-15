@@ -47,17 +47,6 @@ public class UserService : IUserService
         );
     }
 
-    public async Task<bool> UpdatePreferences(string userId, Preferences preferences)
-    {
-        var update = Builders<User>.Update.Set("Preferences", preferences);
-
-        var result = await _usersCollection.UpdateOneAsync(
-            Builders<User>.Filter.Eq("_id", ObjectId.Parse(userId)),
-            update
-        );
-        return result.ModifiedCount > 0;
-    }
-
     public async Task UpdateRole(string userId, Role role)
     {
         var update = Builders<User>.Update.Set("Role", role);

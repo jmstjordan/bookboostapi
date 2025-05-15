@@ -35,16 +35,17 @@ public class AuthController : ControllerBase
         }
 
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
+        var subscriber = await _subscriberService.UpsertSubscriber(new Subscriber { Email = request.Email, SubscriberSource = SubscriberSource.BookTokClub });
         var user = new User
         {
             Email = request.Email,
             PasswordHash = hashedPassword,
             Role = request.Role,
-            Username = request.Email.GetUsername()
+            Username = request.Email.GetUsername(),
+            SubscriberId = subscriber.Id
         };
         await _userService.CreatUser(user);
-        await _emailService.SendUserCreated(user);
-        await _subscriberService.AddSubscriber(new Subscriber { Email = request.Email, SubscriberSource = SubscriberSource.BookTokClub });
+        await _emailService.SendUserCreated(user, request.Role);
         var newAccessToken = _authService.GenerateAccessToken(user);
         var newRefreshToken = await _authService.GenerateToken(user, TokenType.Refresh, 168); // 7 days
 
@@ -93,6 +94,8 @@ public class AuthController : ControllerBase
 
         // Check if user exists, or create one
         var user = await _userService.GetUserbyEmail(payload.Email);
+        var subscriber = await _subscriberService.UpsertSubscriber(new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub });
+
         if (user == null)
         {
             user = new User
@@ -101,11 +104,11 @@ public class AuthController : ControllerBase
                 Role = request.Role,
                 Username = payload.Email.GetUsername(),
                 Name = payload.Name,
-                ProfilePicture = payload.Picture
+                ProfilePicture = payload.Picture,
+                SubscriberId = subscriber.Id
             };
             await _userService.CreatUser(user);
-            await _subscriberService.AddSubscriber(new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub });
-            await _emailService.SendUserCreated(user);
+            await _emailService.SendUserCreated(user, request.Role);
         }
         else if (user.Name == null)
         {

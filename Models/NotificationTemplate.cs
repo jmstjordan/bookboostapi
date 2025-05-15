@@ -26,6 +26,7 @@ public enum TemplateType
     AdDeclined,
     AdCanceled,
     PromotionJoined,
-    UserCreated,
+    ReaderCreated,
+    AuthorCreated,
     PasswordReset
 }
