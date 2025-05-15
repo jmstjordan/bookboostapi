@@ -22,6 +22,7 @@ public class User
     public required string Email { get; set; }
     
     [JsonIgnore]
+    [BsonIgnoreIfNull]
     public string? PasswordHash { get; set;}
 
     [BsonRepresentation(BsonType.String)]

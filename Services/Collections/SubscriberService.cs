@@ -32,7 +32,7 @@ public class SubscriberService : ISubscriberService
 
         var update = Builders<Subscriber>.Update
             .Set(u => u.IsSubscribed, subscriber.IsSubscribed)
-            .Set(u => u.Preferences, subscriber.Preferences)
+            .Set(u => u.Topics, subscriber.Topics)
             .Set(u => u.SubscriberSource, subscriber.SubscriberSource)
             .SetOnInsert(u => u.Created, DateTime.UtcNow); // Only set Created if inserting
 
@@ -44,19 +44,6 @@ public class SubscriberService : ISubscriberService
 
         var result = await _subscriberCollection.FindOneAndUpdateAsync(filter, update, options);
         return result;
-    }
-
-    public async Task<bool> UpdatePreferences(string userId, Preferences preferences)
-    {
-        var user = await _userService.GetUser(userId);
-
-        var update = Builders<Subscriber>.Update.Set("Preferences", preferences);
-
-        var result = await _subscriberCollection.UpdateOneAsync(
-            Builders<Subscriber>.Filter.Eq("_id", ObjectId.Parse(user.SubscriberId)),
-            update
-        );
-        return result.ModifiedCount > 0;
     }
 
     public async Task<Subscriber> GetSubscriberByUserId(string userId)
@@ -75,4 +62,20 @@ public class SubscriberService : ISubscriberService
         );
     }
 
+    public async Task<Subscriber> UpdateSubscriber(string userId, SubscriberPatch subscriber)
+    {
+        var user = await _userService.GetUser(userId);
+        var filter = Builders<Subscriber>.Filter.Eq(s => s.Id, user.SubscriberId);
+
+        var update = Builders<Subscriber>.Update
+            .Set(u => u.IsSubscribed, subscriber.IsSubscribed)
+            .Set(u => u.Topics, subscriber.Topics);
+
+        var options = new FindOneAndUpdateOptions<Subscriber>
+        {
+            ReturnDocument = ReturnDocument.After // Return the updated
+        };
+
+        return await _subscriberCollection.FindOneAndUpdateAsync(filter, update, options);
+    }
 }

@@ -43,29 +43,16 @@ public class DistributionController : ControllerBase
         return Ok(await _subscriberService.GetSubscriberByUserId(userId));
     }
 
-    [HttpPatch("Subscriber/Preferences")]
+    [HttpPatch("Subscriber")]
     [Authorize]
-    public async Task<IActionResult> UpdateSubscriberPreferences([FromBody] Preferences preferences)
+    public async Task<IActionResult> UpdateSubscriber([FromBody] SubscriberPatch subscriber)
     {
         var userId = HttpContext.GetUserId();
         if (userId == null)
         {
             return Unauthorized();
         }
-        var updated = await _subscriberService.UpdatePreferences(userId, preferences);
+        var updated = await _subscriberService.UpdateSubscriber(userId, subscriber);
         return Ok(updated);
-    }
-
-    [HttpPatch("Subscriber/Subscribe")]
-    [Authorize]
-    public async Task<IActionResult> Subscribe([FromBody] SubscribeUpload subscribe)
-    {
-        var userId = HttpContext.GetUserId();
-        if (userId == null)
-        {
-            return Unauthorized();
-        }
-        await _subscriberService.Subscribe(userId, subscribe.Subscribe);
-        return Ok();
     }
 }
