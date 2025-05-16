@@ -23,12 +23,20 @@ public class DistributionController : ControllerBase
         {
             return BadRequest("Invalid Email");
         }
-        var subscriber = new Subscriber
+        var subscriber = await _subscriberService.GetSubscriberByEmail(subscriberUpload.Email);
+        if(subscriber == null)
         {
-            Email = subscriberUpload.Email,
-            SubscriberSource = subscriberUpload.SubscriberSource
-        };
-        await _subscriberService.UpsertSubscriber(subscriber);
+            subscriber = new Subscriber
+            {
+                Email = subscriberUpload.Email,
+                SubscriberSource = subscriberUpload.SubscriberSource
+            };
+        }
+        else
+        {
+            return Conflict("Email address already exists");
+        }
+        await _subscriberService.AddSubscriber(subscriber);
         return NoContent();
     }
 

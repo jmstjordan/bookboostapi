@@ -35,7 +35,12 @@ public class AuthController : ControllerBase
         }
 
         var hashedPassword = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        var subscriber = await _subscriberService.UpsertSubscriber(new Subscriber { Email = request.Email, SubscriberSource = SubscriberSource.BookTokClub });
+        var subscriber = await _subscriberService.GetSubscriberByEmail(request.Email);
+        if(subscriber == null)
+        {
+            subscriber = new Subscriber { Email = request.Email, SubscriberSource = SubscriberSource.BookTokClub };
+            await _subscriberService.AddSubscriber(subscriber);
+        }
         var user = new User
         {
             Email = request.Email,
@@ -62,7 +67,7 @@ public class AuthController : ControllerBase
     {
         var user = await _userService.GetUserbyEmail(request.Email);
 
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        if (user == null || user.PasswordHash == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
         {
             return Unauthorized("Invalid Credentials");
         }
@@ -94,7 +99,12 @@ public class AuthController : ControllerBase
 
         // Check if user exists, or create one
         var user = await _userService.GetUserbyEmail(payload.Email);
-        var subscriber = await _subscriberService.UpsertSubscriber(new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub });
+        var subscriber = await _subscriberService.GetSubscriberByEmail(payload.Email);
+        if(subscriber == null)
+        {
+            subscriber = new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub };
+            await _subscriberService.AddSubscriber(subscriber);
+        }
 
         if (user == null)
         {

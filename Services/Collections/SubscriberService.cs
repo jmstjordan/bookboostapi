@@ -46,6 +46,11 @@ public class SubscriberService : ISubscriberService
         return result;
     }
 
+    public async Task AddSubscriber(Subscriber subscriber)
+    {
+        await _subscriberCollection.InsertOneAsync(subscriber);
+    }
+
     public async Task<Subscriber> GetSubscriberByUserId(string userId)
     {
         var user = await _userService.GetUser(userId);
@@ -77,5 +82,10 @@ public class SubscriberService : ISubscriberService
         };
 
         return await _subscriberCollection.FindOneAndUpdateAsync(filter, update, options);
+    }
+
+    public async Task<Subscriber> GetSubscriberByEmail(string email)
+    {
+        return await _subscriberCollection.Find(s => s.Email == email).FirstOrDefaultAsync();
     }
 }
