@@ -41,7 +41,7 @@ public class AppEmailService : IAppEmailService
     {
         var user = await _userService.GetUser(userId);
         var product = await _productService.GetProduct(ad.ProductId);
-        return await RenderAndSend(TemplateType.AdCreated, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
+        return await RenderAndSend(TemplateType.AdCreated, new { FirstName = user.FirstName, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendAdAccepted(string userId, Ad ad)
@@ -68,7 +68,7 @@ public class AppEmailService : IAppEmailService
     public async Task<bool> SendUserCreated(User user, Role role)
     {
         var template = role == Role.Author ? TemplateType.AuthorCreated : TemplateType.ReaderCreated;
-        return await RenderAndSend(template, new { Username = user.Username, Email = user.Email }, user.Email);
+        return await RenderAndSend(template, new { FirstName = user.FirstName, Email = user.Email }, user.Email);
     }
 
     public async Task<bool> SendPromotionJoined(string userId)
