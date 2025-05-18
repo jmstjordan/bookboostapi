@@ -9,12 +9,12 @@ public class PriceService : IPriceService
     {
         var prices = new Dictionary<Genre, int>
         {
-            {Genre.Romance, 6000},
-            {Genre.Fantasy, 4000},
-            {Genre.MysteryThriller, 3000},
-            {Genre.ScienceFiction, 2000},
-            {Genre.YoungAdult, 5500},
-            {Genre.NonFiction, 5100}
+            {Genre.Romance, 5000},
+            {Genre.Fantasy, 5000},
+            {Genre.MysteryThriller, 5000},
+            {Genre.ScienceFiction, 5000},
+            {Genre.YoungAdult, 5000},
+            {Genre.NonFiction, 5000}
         };
         return prices;
     }

@@ -14,7 +14,10 @@ public class User
     public string? Username { get; set; }
 
     [BsonIgnoreIfNull]
-    public string? Name { get; set; }
+    public required string FirstName { get; set; }
+
+    [BsonIgnoreIfNull]
+    public required string LastName { get; set; }
 
     [BsonIgnoreIfNull]
     public string? ProfilePicture { get; set; }

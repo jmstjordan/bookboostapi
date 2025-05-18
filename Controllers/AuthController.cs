@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("Signup")]
-    public async Task<IActionResult> Signup([FromBody] LoginRequest request)
+    public async Task<IActionResult> Signup([FromBody] SignUpRequest request)
     {
         if (await _userService.GetUserbyEmail(request.Email) != null)
         {
@@ -46,6 +46,8 @@ public class AuthController : ControllerBase
             Email = request.Email,
             PasswordHash = hashedPassword,
             Role = request.Role,
+            FirstName = request.FirstName,
+            LastName = request.LastName,
             Username = request.Email.GetUsername(),
             SubscriberId = subscriber.Id
         };
@@ -97,15 +99,14 @@ public class AuthController : ControllerBase
             return Unauthorized("Invalid Google token");
         }
 
-        // Check if user exists, or create one
-        var user = await _userService.GetUserbyEmail(payload.Email);
         var subscriber = await _subscriberService.GetSubscriberByEmail(payload.Email);
         if(subscriber == null)
         {
             subscriber = new Subscriber { Email = payload.Email, SubscriberSource = SubscriberSource.BookTokClub };
             await _subscriberService.AddSubscriber(subscriber);
         }
-
+        // Check if user exists, or create one
+        var user = await _userService.GetUserbyEmail(payload.Email);
         if (user == null)
         {
             user = new User
@@ -113,16 +114,13 @@ public class AuthController : ControllerBase
                 Email = payload.Email,
                 Role = request.Role,
                 Username = payload.Email.GetUsername(),
-                Name = payload.Name,
+                FirstName = payload.GivenName,
+                LastName = payload.FamilyName,
                 ProfilePicture = payload.Picture,
                 SubscriberId = subscriber.Id
             };
             await _userService.CreatUser(user);
             await _emailService.SendUserCreated(user, request.Role);
-        }
-        else if (user.Name == null)
-        {
-            await _userService.UpdateUserField(user.Id, "Name", payload.Name);
         }
 
         var newAccessToken = _authService.GenerateAccessToken(user);
