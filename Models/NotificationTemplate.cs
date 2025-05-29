@@ -28,5 +28,6 @@ public enum TemplateType
     PromotionJoined,
     ReaderCreated,
     AuthorCreated,
-    PasswordReset
+    PasswordReset,
+    PaymentIssue
 }

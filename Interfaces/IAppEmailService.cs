@@ -17,4 +17,6 @@ public interface IAppEmailService
     public Task<bool> SendPromotionJoined(string userId);
 
     public Task<bool> SendPasswordReset(User user, string resetUrl);
+
+    public Task<bool> SendPaymentIssue(string userId, Ad ad);
 }

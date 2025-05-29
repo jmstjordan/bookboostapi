@@ -48,21 +48,21 @@ public class AppEmailService : IAppEmailService
     {
         var user = await _userService.GetUser(userId);
         var product = await _productService.GetProduct(ad.ProductId);
-        return await RenderAndSend(TemplateType.AdAccepted, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
+        return await RenderAndSend(TemplateType.AdAccepted, new { FirstName = user.FirstName, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendAdDeclined(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
         var product = await _productService.GetProduct(ad.ProductId);
-        return await RenderAndSend(TemplateType.AdDeclined, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
+        return await RenderAndSend(TemplateType.AdDeclined, new { FirstName = user.FirstName, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendAdCanceled(string userId, Ad ad)
     {
         var user = await _userService.GetUser(userId);
         var product = await _productService.GetProduct(ad.ProductId);
-        return await RenderAndSend(TemplateType.AdCanceled, new { Username = user.Username, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
+        return await RenderAndSend(TemplateType.AdCanceled, new { FirstName = user.FirstName, Email = user.Email, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 
     public async Task<bool> SendUserCreated(User user, Role role)
@@ -79,6 +79,13 @@ public class AppEmailService : IAppEmailService
 
     public async Task<bool> SendPasswordReset(User user, string resetUrl)
     {
-        return await RenderAndSend(TemplateType.PasswordReset, new { Firstname = "Bill", Lastname = "Gates", ResetUrl = resetUrl }, user.Email);
+        return await RenderAndSend(TemplateType.PasswordReset, new { FirstName = user.FirstName, ResetUrl = resetUrl }, user.Email);
+    }
+
+    public async Task<bool> SendPaymentIssue(string userId, Ad ad)
+    {
+        var user = await _userService.GetUser(userId);
+        var product = await _productService.GetProduct(ad.ProductId);
+        return await RenderAndSend(TemplateType.PaymentIssue, new { FirstName = user.FirstName, OrderNumber = ad.OrderId, ProductId = product.ProductId, Title = product.Title, Date = ad.AdDate, Price = ad.Price, Image = product.Image }, user.Email);
     }
 }

@@ -53,6 +53,8 @@ public class AdController : ControllerBase
             }
             else
             {
+                await _emailService.SendPaymentIssue(currentAd.UserId, currentAd);
+                ad.State = AdState.Canceled;
                 return BadRequest("Unable to charge user for ad");
             }
         }
@@ -62,7 +64,7 @@ public class AdController : ControllerBase
         }        
         else if(ad.State == AdState.Canceled)
         {
-            await _emailService.SendAdDeclined(currentAd.UserId, currentAd);
+            await _emailService.SendAdCanceled(currentAd.UserId, currentAd);
         }
         await _adService.UpdateField(id, "State", ad.State);
         return Ok(ad.State);
