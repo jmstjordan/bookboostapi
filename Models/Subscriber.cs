@@ -23,6 +23,7 @@ public class Subscriber : SubscriberUpload
 
     public DateTime Created { get; set; } = DateTime.UtcNow;
 
+    [BsonRepresentation(BsonType.String)]
     public Genre[] Topics { get; set; } = (Genre[])Enum.GetValues(typeof(Genre));
 }
 
