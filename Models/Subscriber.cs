@@ -24,14 +24,14 @@ public class Subscriber : SubscriberUpload
     public DateTime Created { get; set; } = DateTime.UtcNow;
 
     [BsonRepresentation(BsonType.String)]
-    public Genre[] Topics { get; set; } = (Genre[])Enum.GetValues(typeof(Genre));
+    public Topic[] Topics { get; set; } = (Topic[])Enum.GetValues(typeof(Topic));
 }
 
 public class SubscriberPatch
 {
     public bool IsSubscribed { get; set; }
 
-    public Genre[] Topics { get; set; }
+    public Topic[] Topics { get; set; }
 }
 
 public enum SubscriberSource

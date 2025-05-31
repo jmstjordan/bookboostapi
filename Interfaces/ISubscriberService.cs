@@ -14,4 +14,6 @@ public interface ISubscriberService
     public Task<Subscriber> GetSubscriberByEmail(string userId);
 
     public Task AddSubscriber(Subscriber subscriber);
+
+    public IEnumerable<Topic> GetTopics();
 }

@@ -19,12 +19,12 @@ public class DistributionController : ControllerBase
     [HttpPost("Subscriber")]
     public async Task<IActionResult> AddSubscriber([FromBody] SubscriberUpload subscriberUpload)
     {
-        if(!new EmailAddressAttribute().IsValid(subscriberUpload.Email))
+        if (!new EmailAddressAttribute().IsValid(subscriberUpload.Email))
         {
             return BadRequest("Invalid Email");
         }
         var subscriber = await _subscriberService.GetSubscriberByEmail(subscriberUpload.Email);
-        if(subscriber == null)
+        if (subscriber == null)
         {
             subscriber = new Subscriber
             {
@@ -62,5 +62,12 @@ public class DistributionController : ControllerBase
         }
         var updated = await _subscriberService.UpdateSubscriber(userId, subscriber);
         return Ok(updated);
+    }
+    
+    [HttpGet("Topics")]
+    [Authorize]
+    public ActionResult GetTopics()
+    {
+        return Ok(_subscriberService.GetTopics());
     }
 }

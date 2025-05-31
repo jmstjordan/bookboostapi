@@ -10,7 +10,7 @@ public enum Genre
 
     [BsonRepresentation(BsonType.String)]
     Fantasy,
-    
+
     [BsonRepresentation(BsonType.String)]
     MysteryThriller,
 
@@ -22,4 +22,31 @@ public enum Genre
 
     [BsonRepresentation(BsonType.String)]
     NonFiction
+}
+
+public enum Topic
+{
+    [BsonRepresentation(BsonType.String)]
+    Romance,
+
+    [BsonRepresentation(BsonType.String)]
+    Fantasy,
+
+    [BsonRepresentation(BsonType.String)]
+    MysteryThriller,
+
+    [BsonRepresentation(BsonType.String)]
+    ScienceFiction,
+
+    [BsonRepresentation(BsonType.String)]
+    YoungAdult,
+
+    [BsonRepresentation(BsonType.String)]
+    NonFiction,
+
+    [BsonRepresentation(BsonType.String)]
+    Horror,
+
+    [BsonRepresentation(BsonType.String)]
+    HistoricalFiction
 }

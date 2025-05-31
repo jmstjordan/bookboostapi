@@ -88,4 +88,9 @@ public class SubscriberService : ISubscriberService
     {
         return await _subscriberCollection.Find(s => s.Email == email).FirstOrDefaultAsync();
     }
+
+    public IEnumerable<Topic> GetTopics()
+    {
+        return (Topic[])Enum.GetValues(typeof(Topic));
+    }
 }
